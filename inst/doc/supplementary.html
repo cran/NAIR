@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Supplementary Functions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<style type="text/css">.tabset>.tab {
+display: none;
+border: solid 1px black;
+padding: 5px; }
+.tabset>.tab.active {
+display: block; }
+.tabset>.tab>:first-child {
+display: none; }
+.tabset>.tabmenu {
+margin-bottom: 0;
+padding: 0; }
+.tabset>.tabmenu li {
+display: inline-block;
+margin: 0 2px 0 0; }
+.tabset>.tabmenu button {
+text-decoration: none;
+font-weight: normal; }
+.tabset>.tabmenu .active button {
+text-decoration: solid underline;
+font-weight: bold; }
+.tabset>.tabmenu .active button:before {
+content: "> "; }
+</style>
+<script>window.addEventListener('load', function() {
+  let tabIds = [];
+
+  function toggle(elem, from = 0, to = 0) {
+    elem[from].classList.remove("active");
+    elem[to].classList.add("active");
+    return to;
+  }
+
+  function initialize(tabs) {
+    const active = tabs.findIndex(x => x.classList.contains("active"));
+    tabs.forEach(function(x) {
+      tabIds.push(x.id);
+      x.dataset.id = x.id;
+      x.removeAttribute("id");
+      x.classList.add("tab");
+      x.classList.remove("active");
+    });
+    return toggle(tabs, 0, active * (active > 0));
+  }
+
+  // Implement
+  Array.from(document.querySelectorAll(".section.tabset")).forEach(section => {
+    const tabs = Array.from(section.querySelectorAll(":scope>.section"));
+    let active = initialize(tabs);
+
+    const ul = section.insertBefore(document.createElement("ul"), tabs[0]);
+    ul.classList.add("tabmenu");
+    tabs.forEach((tab, current) => {
+      const button = document.createElement("button");
+      ul.appendChild(document.createElement("li")).appendChild(button);
+      button.id = tab.dataset.id;
+      button.innerHTML = tab.children[0].innerHTML;
+      button.addEventListener("click", function() {
+        history.pushState(null, null, "#" + button.id);
+        toggle(tabs, active, current);
+        active = toggle(ul.children, active, current);
+      });
+    });
+    toggle(ul.children, 0, active);
+  });
+
+  // Navigation
+  function showHashTab() {
+    const buttonId = tabIds.find(x => ('#' + x) === location.hash);
+    if (!buttonId) return;
+    const button = document.getElementById(buttonId);
+    let el = button.parentElement.parentElement.parentElement;
+    while (el) {
+      if (
+        el.tagName === "SECTION"
+        && el.classList.contains("tab")
+        && !el.classList.contains("active")
+      ) {
+        document.getElementById(el.dataset.id).click();
+      }
+      el = el.parentElement;
+    }
+    button.click();
+    button.scrollIntoView();
+  }
+  showHashTab();
+  window.addEventListener("hashchange", showHashTab);
+});
+
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Supplementary Functions</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <code>NAIR</code> package contains a number of functions
+supplementary to <code>buildRepSeqNetwork()</code> that can be used to
+perform additional downstream tasks.</p>
+<div id="simulate-data-for-demonstration" class="section level2">
+<h2>Simulate Data for Demonstration</h2>
+<p>We simulate some toy data for demonstration.</p>
+<p>We simulate data consisting of two samples with 100 observations
+each, for a total of 200 observations (rows).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(NAIR)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>dir_out <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>toy_data <span class="ot">&lt;-</span> <span class="fu">simulateToyData</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">head</span>(toy_data)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;        CloneSeq CloneFrequency CloneCount SampleID</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 1 TTGAGGAAATTCG    0.007873775       3095  Sample1</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 2 GGAGATGAATCGG    0.007777102       3057  Sample1</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 3 GTCGGGTAATTGG    0.009094910       3575  Sample1</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; 4 GCCGGGTAATTCG    0.010160859       3994  Sample1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 5 GAAAGAGAATTCG    0.009336593       3670  Sample1</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; 6 AGGTGGGAATTCG    0.010369470       4076  Sample1</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">nrow</span>(toy_data)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; [1] 200</span></span></code></pre></div>
+<p>Before we go through the various functions, the code below shows an
+example of how some of them might be used together.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(magrittr) <span class="co"># For pipe operator (%&gt;%)</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>toy_data <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">filterInputData</span>(<span class="st">&quot;CloneSeq&quot;</span>, <span class="at">drop_matches =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">W&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">buildNet</span>(<span class="st">&quot;CloneSeq&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="fu">addNodeStats</span>(<span class="st">&quot;all&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="fu">addClusterMembership</span>(<span class="st">&quot;greedy&quot;</span>, <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_greedy&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="fu">addClusterMembership</span>(<span class="st">&quot;leiden&quot;</span>, <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_leiden&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="fu">addClusterStats</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="st">&quot;CloneSeq&quot;</span>, <span class="st">&quot;CloneCount&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="fu">addPlots</span>(<span class="at">color_nodes_by =</span> <span class="fu">c</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="st">&quot;cluster_greedy&quot;</span>), </span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>           <span class="at">color_scheme =</span> <span class="st">&quot;Viridis&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">labelClusters</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="at">cluster_id_col =</span> <span class="st">&quot;cluster_leiden&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="fu">labelClusters</span>(<span class="st">&quot;cluster_greedy&quot;</span>, <span class="at">cluster_id_col =</span> <span class="st">&quot;cluster_greedy&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="fu">saveNetwork</span>(<span class="at">output_dir =</span> <span class="fu">tempdir</span>(), <span class="at">output_name =</span> <span class="st">&quot;my_network&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="addplots" class="section level1">
+<h1><code>addPlots()</code></h1>
+<p><code>addPlots()</code> can be used to generate plots of a network
+graph.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildRepSeqNetwork</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addPlots</span>(net, <span class="at">color_nodes_by =</span> <span class="st">&quot;SampleID&quot;</span>)</span></code></pre></div>
+<p>See <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/network_visualization.html#new_plots">this
+article</a> for more details.</p>
+</div>
+<div id="addnodestats" class="section level1">
+<h1><code>addNodeStats()</code></h1>
+<p><code>addNodeStats()</code> can be used to compute node-level network
+properties for a network.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addNodeStats</span>(net, <span class="at">stats_to_include =</span> <span class="st">&quot;all&quot;</span>)</span></code></pre></div>
+<p>See <a href="node_properties.html">this article</a> for more
+details.</p>
+</div>
+<div id="addclusterstats" class="section level1">
+<h1><code>addClusterStats()</code></h1>
+<p><code>addClusterStats()</code> can be used to perform cluster
+analysis for a network. It performs clustering, records the cluster
+membership of the nodes, and computes cluster properties.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addClusterStats</span>(net, <span class="at">cluster_fun =</span> <span class="st">&quot;walktrap&quot;</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                       <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_walktrap&quot;</span>)</span></code></pre></div>
+<p>See <a href="cluster_analysis.html">this article</a> for more
+details.</p>
+</div>
+<div id="addclustermembership" class="section level1">
+<h1><code>addClusterMembership()</code></h1>
+<p><code>addClusterMembership()</code> can be used to perform clustering
+and record the cluster membership of the nodes without computing cluster
+properties. It is useful for performing multiple instances of clustering
+with different algorithms.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addClusterMembership</span>(net, </span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                            <span class="at">cluster_fun =</span> <span class="st">&quot;leiden&quot;</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>                            <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_leiden&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addClusterMembership</span>(net, </span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                            <span class="at">cluster_fun =</span> <span class="st">&quot;louvain&quot;</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>                            <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_louvain&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>)</span></code></pre></div>
+<p>Refer <a href="cluster_analysis.html#cluster-membership-only">here</a> for more
+details.</p>
+</div>
+<div id="addclusterlabels" class="section level1">
+<h1><code>addClusterLabels()</code></h1>
+<p><code>addClusterLabels()</code> can be used to label the clusters in
+a plot.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">addPlots</span>(net,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                <span class="at">color_nodes_by =</span> <span class="st">&quot;cluster_louvain&quot;</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                <span class="at">color_scheme =</span> <span class="st">&quot;Viridis&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">labelClusters</span>(net,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                     <span class="at">cluster_id_col =</span> <span class="st">&quot;cluster_louvain&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>                     <span class="at">top_n_clusters =</span> <span class="dv">7</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                     <span class="at">size =</span> <span class="dv">7</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>net<span class="sc">$</span>plots<span class="sc">$</span>cluster_louvain</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; Warning: Removed 115 rows containing missing values (`geom_text()`).</span></span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="100%" style="display: block; margin: auto;" /></p>
+<p>Refer <a href="cluster_analysis.html#labeling-clusters">here</a> for
+more details.</p>
+</div>
+<div id="labelnodes" class="section level1">
+<h1><code>labelNodes()</code></h1>
+<p><code>labelNodes()</code> can be used to label the nodes in network
+plots.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>small_sample <span class="ot">&lt;-</span> <span class="fu">simulateToyData</span>(<span class="dv">1</span>, <span class="at">sample_size =</span> <span class="dv">10</span>, <span class="at">prefix_length =</span> <span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(small_sample, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">plot_title =</span> <span class="cn">NULL</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">labelNodes</span>(net, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">size =</span> <span class="dv">4</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>net<span class="sc">$</span>plots[[<span class="dv">1</span>]]</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="savenetwork" class="section level1">
+<h1><code>saveNetwork()</code></h1>
+<p><code>saveNetwork()</code> can be used to save a list of network
+objects. Also prints any plots to a PDF containing one plot per
+page.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">saveNetwork</span>(net, <span class="at">output_dir =</span> dir_out, <span class="at">output_type =</span> <span class="st">&quot;individual&quot;</span>)</span></code></pre></div>
+<p>The parameters <code>output_dir</code>, <code>output_type</code>,
+<code>output_name</code>, <code>pdf_width</code> and
+<code>pdf_height</code> have the <a href="buildRepSeqNetwork.html#output-settings">same behavior</a> as they
+do in the <code>buildRepSeqNetwork()</code> function.</p>
+</div>
+<div id="savenetworkplots" class="section level1">
+<h1><a name="save"></a> <code>saveNetworkPlots()</code></h1>
+<p><code>saveNetworkPlots()</code> can be used to save the plots for a
+network to a PDF containing one plot per page.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">saveNetworkPlots</span>(net<span class="sc">$</span>plots, <span class="at">outfile =</span> <span class="fu">file.path</span>(dir_out, <span class="st">&quot;plots.pdf&quot;</span>))</span></code></pre></div>
+</div>
+<div id="loaddatafromfilelist" class="section level1">
+<h1><a name="load"></a><code>loadDataFromFileList()</code></h1>
+<p><code>loadDataFromFileList()</code> can be used to load data from
+multiple files and combine them into a single data frame.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">loadDataFromFileList</span>(<span class="fu">list.files</span>(my_dir), <span class="at">input_type =</span> <span class="st">&quot;rds&quot;</span>)</span></code></pre></div>
+<p>The primary parameter accepts a character vector containing file
+paths or a list containing file paths and connections. Each element
+corresponds to a single file. Each file is assumed to contain the data
+for a single sample, with observations indexed by row, and with the same
+columns across samples.</p>
+<p>The supported values of <code>input_type</code> are
+<code>&quot;rds&quot;</code>, <code>&quot;rda&quot;</code>, <code>&quot;csv&quot;</code>,
+<code>&quot;csv2&quot;</code>, <code>&quot;tsv&quot;</code> and <code>&quot;table&quot;</code>. Each
+value specifies a different function to load the files. The respective
+functions are <code>readRDS()</code>, <code>load()</code>,
+<code>read.csv()</code>, <code>read.csv2()</code>,
+<code>read.delim()</code>, and <code>read.table()</code>.</p>
+<div id="text-formats" class="section level2">
+<h2>Text formats</h2>
+<p>For text formats (values of <code>input_type</code> other than
+<code>&quot;rds&quot;</code> and <code>&quot;rda&quot;</code>), non-default argument values
+can be specified to the optional parameters of the reading function
+using the <code>read.args</code> argument. It accepts a named list of
+argument values.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">loadDataFromFileList</span>(<span class="fu">list.files</span>(my_dir),</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                     <span class="at">input_type =</span> <span class="st">&quot;table&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                     <span class="at">read.args =</span> <span class="fu">list</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>                       <span class="at">header =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>                       <span class="at">sep =</span> <span class="st">&quot; &quot;</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>                       <span class="at">dec =</span> <span class="st">&quot;,&quot;</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                       <span class="at">na.strings =</span> <span class="st">&quot;NA!&quot;</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                       <span class="at">row.names =</span> <span class="dv">1</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>                       <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">&quot;RowID&quot;</span>, </span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>                                     <span class="st">&quot;CloneSeq&quot;</span>, <span class="st">&quot;CloneFrequency&quot;</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>                                     <span class="st">&quot;CloneCount&quot;</span>, <span class="st">&quot;VGene&quot;</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>                       )</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>                     )</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>)</span></code></pre></div>
+<p>See <code>?utils::read.table()</code> for the parameters and their
+accepted values. Note that <code>read.csv()</code>,
+<code>read.csv2()</code> and <code>read.delim()</code> are identical to
+<code>read.table()</code> other than their default argument values. Some
+examples of useful parameters include:</p>
+<ul>
+<li><code>header</code>: Whether the first row contains column
+names.</li>
+<li><code>sep</code>: The character separating consecutive values in
+each row.</li>
+<li><code>dec</code>: The character used as a decimal point.</li>
+<li><code>quote</code>: The character(s) used as quotes within character
+strings.</li>
+<li><code>na.strings</code>: The character string representing NA
+values.</li>
+<li><code>row.names</code>: The row names or the column containing the
+row names.</li>
+<li><code>col.names</code>: The column names, for files without a header
+row.</li>
+<li><code>colClasses</code>: For manually specifying the class of each
+column.</li>
+<li><code>as.is</code>: For specifying the character columns to be
+converted to factors.</li>
+<li><code>nrows</code>: Max number of rows (specification can improve
+memory usage)</li>
+</ul>
+</div>
+<div id="rdata-format" class="section level2">
+<h2>RData format</h2>
+<p>For the <code>&quot;rda&quot;</code> input type, the <code>data_symbols</code>
+parameter accepts a character vector specifying the name of each
+sample’s data frame within its respective Rdata file (i.e., the name of
+the data frame in the R environment). A single character string can be
+used if each sample’s data frame has the same name.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">save</span>(df_sample1, <span class="at">file =</span> file_1)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">save</span>(df_sample2, <span class="at">file =</span> file_2)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">save</span>(df_sample3, <span class="at">file =</span> file_3)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">loadDataFromFileList</span>(<span class="fu">c</span>(file_1, file_2, file_3),</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>                     <span class="at">input_type =</span> <span class="st">&quot;rda&quot;</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>                     <span class="at">data_symbols =</span> <span class="fu">c</span>(<span class="st">&quot;df_sample1&quot;</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>                                      <span class="st">&quot;df_sample2&quot;</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>                                      <span class="st">&quot;df_sample3&quot;</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>                     )</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="combinesamples" class="section level1">
+<h1><code>combineSamples()</code></h1>
+<p><code>combineSamples()</code> has the same default behavior as
+<code>loadDataFromFileList()</code>, but possesses additional parameters
+that give it extra functionality, such as the ability to filter data and
+assign sample/subject/group IDs to each data file, which are then
+included as variables in the combined data frame.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">combineSamples</span>(<span class="fu">list.files</span>(my_dir),</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>                      <span class="at">input_type =</span> <span class="st">&quot;rds&quot;</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>                      <span class="at">min_seq_length =</span> <span class="dv">7</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                      <span class="at">drop_matches =</span> <span class="st">&quot;[*|_]&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>                      <span class="at">subset_cols =</span> <span class="fu">c</span>(<span class="st">&quot;CloneSeq&quot;</span>, <span class="st">&quot;CloneCount&quot;</span>, <span class="st">&quot;VGene&quot;</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                      <span class="at">sample_ids =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                      <span class="at">subject_ids =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                      <span class="at">group_ids =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="filterinputdata" class="section level1">
+<h1><code>filterInputData()</code></h1>
+<p><code>filterInputData()</code> can be used to filter data prior to
+performing network analysis.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>filtered_data <span class="ot">&lt;-</span> <span class="fu">filterInputData</span>(toy_data, </span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                                 <span class="at">seq_col =</span> <span class="st">&quot;CloneSeq&quot;</span>, </span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>                                 <span class="at">min_seq_length =</span> <span class="dv">13</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                                 <span class="at">drop_matches =</span> <span class="st">&quot;GGGG&quot;</span>, </span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                                 <span class="at">subset_cols =</span> <span class="fu">c</span>(<span class="st">&quot;CloneFrequency&quot;</span>, <span class="st">&quot;SampleID&quot;</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>                                 <span class="at">count_col =</span> <span class="st">&quot;CloneCount&quot;</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>                                 <span class="at">verbose =</span> <span class="cn">TRUE</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>)</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; Warning: The `count_col` argument of `filterInputData()` is deprecated as of NAIR 1.0.1.</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; This warning is displayed once every 8 hours.</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; generated.</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; Input data contains 200 rows.</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; Removing sequences with length fewer than 13 characters... Done. 136 rows remaining.</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; Removing sequences containing matches to &quot;GGGG&quot;... Done. 105 rows remaining.</span></span></code></pre></div>
+<p>The function has parameters <a href="buildRepSeqNetwork.html#mainargs"><code>data</code>,
+<code>seq_col</code></a>, <a href="buildRepSeqNetwork.html#input_options"><code>min_seq_length</code>,
+<code>drop_matches</code></a> and <a href="buildRepSeqNetwork.html#subset_cols"><code>subset_cols</code></a>,
+all of which behave in the same manner as seen in
+<code>buildRepSeqNetwork()</code>. In addition, the
+<code>count_col</code> parameter can be used to specify a column
+containing the clone count or UMI count. If specified, observations with
+<code>NA</code> values in this column will be removed from the data.</p>
+</div>
+<div id="aggregateidenticalclones" class="section level1">
+<h1><code>aggregateIdenticalClones()</code></h1>
+<p><code>aggregateIdenticalClones()</code> can be used on bulk AIRR-seq
+data to aggregate data rows containing the same clone sequence, with the
+clone counts and clone frequencies being added together. Aggregation can
+be restricted to being performed only within groups that are defined
+based on specified grouping variables.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>my_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="at">clone_seq =</span> <span class="fu">c</span>(<span class="st">&quot;ATCG&quot;</span>, <span class="fu">rep</span>(<span class="st">&quot;ACAC&quot;</span>, <span class="dv">2</span>), <span class="fu">rep</span>(<span class="st">&quot;GGGG&quot;</span>, <span class="dv">4</span>)),</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">clone_count =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">7</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">clone_freq =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">7</span>, <span class="dv">7</span>),</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="at">time_point =</span> <span class="fu">c</span>(<span class="st">&quot;t_0&quot;</span>, <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;t_0&quot;</span>, <span class="st">&quot;t_1&quot;</span>), <span class="dv">3</span>)),</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="at">subject_id =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="fu">rep</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co"># group clones by time point and subject ID</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>data_agg_time_subject <span class="ot">&lt;-</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="fu">aggregateIdenticalClones</span>(my_data,</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>                           <span class="at">clone_col =</span> <span class="st">&quot;clone_seq&quot;</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>                           <span class="at">count_col =</span> <span class="st">&quot;clone_count&quot;</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>                           <span class="at">freq_col =</span> <span class="st">&quot;clone_freq&quot;</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>                           <span class="at">grouping_cols =</span> <span class="fu">c</span>(<span class="st">&quot;subject_id&quot;</span>, <span class="st">&quot;time_point&quot;</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="getneighborhood" class="section level1">
+<h1><code>getNeighborhood()</code></h1>
+<p><code>getNeighborhood()</code> can be used to extract a subset of
+observations with receptor sequences sufficiently similar to a target
+sequence.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>nbd <span class="ot">&lt;-</span> <span class="fu">getNeighborhood</span>(toy_data,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>                       <span class="at">seq_col =</span> <span class="st">&quot;CloneSeq&quot;</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>                       <span class="at">target_seq =</span> <span class="st">&quot;GGGGGGGAATTGG&quot;</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="generatenetworkobjects" class="section level1">
+<h1><code>generateNetworkObjects()</code></h1>
+<p><code>generateNetworkObjects()</code> can be used to construct the
+minimal output possible from <code>buildRepSeqNetwork()</code>. It does
+not filter the input data, produce plots, compute network properties,
+perform cluster analysis or save data.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">generateNetworkObjects</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>)</span></code></pre></div>
+<p>The function has parameters <a href="buildRepSeqNetwork.html#mainargs"><code>data</code>,
+<code>seq_col</code></a>, <a href="buildRepSeqNetwork.html#network_settings"><code>dist_type</code>,
+<code>dist_cutoff</code> and <code>drop_isolated_nodes</code></a>, all
+of which have the same behavior and default values as seen in
+<code>buildRepSeqNetwork()</code>.</p>
+</div>
+<div id="generatenetworkgraph" class="section level1">
+<h1><code>generateNetworkGraph()</code></h1>
+<p><code>generateNetworkGraph()</code> can be used to generate the
+network <code>igraph</code> from the adjacency matrix.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>net<span class="sc">$</span>igraph <span class="ot">&lt;-</span> <span class="fu">generateNetworkGraph</span>(net<span class="sc">$</span>adjacency_matrix)</span></code></pre></div>
+</div>
+<div id="generateadjacencymatrix" class="section level1">
+<h1><code>generateAdjacencyMatrix()</code></h1>
+<p><code>generateAdjacencyMatrix()</code> can be used to compute the
+network adjacency matrix from the list of receptor sequences.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>output<span class="sc">$</span>adjacency_matrix <span class="ot">&lt;-</span> <span class="fu">generateAdjacencyMatrix</span>(toy_data<span class="sc">$</span>CloneSeq)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="co"># use same settings from original call to buildRepSeqNetwork()</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>net<span class="sc">$</span>adjacency_matrix <span class="ot">&lt;-</span> <span class="fu">generateAdjacencyMatrix</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  net<span class="sc">$</span>node_data<span class="sc">$</span>CloneSeq,</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  <span class="at">dist_type =</span> net<span class="sc">$</span>details<span class="sc">$</span>dist_type,</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>  <span class="at">dist_cutoff =</span> net<span class="sc">$</span>details<span class="sc">$</span>dist_cutoff,</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>  <span class="at">drop_isolated_nodes =</span> net<span class="sc">$</span>details<span class="sc">$</span>drop_isolated_nodes</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>)</span></code></pre></div>
+<p>The parameters <code>dist_type</code>, <code>dist_cutoff</code> and
+<code>drop_isolated_nodes</code> have the <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/buildRepSeqNetwork.html#network_settings">same
+behavior and default values</a> as in
+<code>buildRepSeqNetwork()</code>.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

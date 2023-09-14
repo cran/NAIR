@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>buildRepSeqNetwork()/buildNet()</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<style type="text/css">.tabset>.tab {
+display: none;
+border: solid 1px black;
+padding: 5px; }
+.tabset>.tab.active {
+display: block; }
+.tabset>.tab>:first-child {
+display: none; }
+.tabset>.tabmenu {
+margin-bottom: 0;
+padding: 0; }
+.tabset>.tabmenu li {
+display: inline-block;
+margin: 0 2px 0 0; }
+.tabset>.tabmenu button {
+text-decoration: none;
+font-weight: normal; }
+.tabset>.tabmenu .active button {
+text-decoration: solid underline;
+font-weight: bold; }
+.tabset>.tabmenu .active button:before {
+content: "> "; }
+</style>
+<script>window.addEventListener('load', function() {
+  let tabIds = [];
+
+  function toggle(elem, from = 0, to = 0) {
+    elem[from].classList.remove("active");
+    elem[to].classList.add("active");
+    return to;
+  }
+
+  function initialize(tabs) {
+    const active = tabs.findIndex(x => x.classList.contains("active"));
+    tabs.forEach(function(x) {
+      tabIds.push(x.id);
+      x.dataset.id = x.id;
+      x.removeAttribute("id");
+      x.classList.add("tab");
+      x.classList.remove("active");
+    });
+    return toggle(tabs, 0, active * (active > 0));
+  }
+
+  // Implement
+  Array.from(document.querySelectorAll(".section.tabset")).forEach(section => {
+    const tabs = Array.from(section.querySelectorAll(":scope>.section"));
+    let active = initialize(tabs);
+
+    const ul = section.insertBefore(document.createElement("ul"), tabs[0]);
+    ul.classList.add("tabmenu");
+    tabs.forEach((tab, current) => {
+      const button = document.createElement("button");
+      ul.appendChild(document.createElement("li")).appendChild(button);
+      button.id = tab.dataset.id;
+      button.innerHTML = tab.children[0].innerHTML;
+      button.addEventListener("click", function() {
+        history.pushState(null, null, "#" + button.id);
+        toggle(tabs, active, current);
+        active = toggle(ul.children, active, current);
+      });
+    });
+    toggle(ul.children, 0, active);
+  });
+
+  // Navigation
+  function showHashTab() {
+    const buttonId = tabIds.find(x => ('#' + x) === location.hash);
+    if (!buttonId) return;
+    const button = document.getElementById(buttonId);
+    let el = button.parentElement.parentElement.parentElement;
+    while (el) {
+      if (
+        el.tagName === "SECTION"
+        && el.classList.contains("tab")
+        && !el.classList.contains("active")
+      ) {
+        document.getElementById(el.dataset.id).click();
+      }
+      el = el.parentElement;
+    }
+    button.click();
+    button.scrollIntoView();
+  }
+  showHashTab();
+  window.addEventListener("hashchange", showHashTab);
+});
+
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">buildRepSeqNetwork()/buildNet()</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>General network analysis on Adaptive Immune Receptor Repertoire
+Sequencing (AIRR-Seq) data is performed using
+<code>buildRepSeqNetwork()</code> or its convenient alias
+<code>buildNet()</code>. This function does the following:</p>
+<ul>
+<li>Filters the AIRR-Seq data according to user specifications</li>
+<li>Builds the network graph for the immune repertoire</li>
+<li>Performs additional network analysis, which can include:
+<ul>
+<li>Cluster analysis</li>
+<li>Network properties</li>
+<li>Customizable visual plots of the network graph</li>
+</ul></li>
+<li>Returns (and optionally saves) the following output:
+<ul>
+<li>The network graph (as <code>igraph</code> and adjacency matrix)</li>
+<li>Metadata for the network</li>
+<li>Metadata for the nodes in the network</li>
+<li>Metadata for the clusters in the network</li>
+<li>Plots of the network graph</li>
+</ul></li>
+</ul>
+<div id="simulate-data-for-demonstration" class="section level4">
+<h4>Simulate Data for Demonstration</h4>
+<p>We simulate some toy data for demonstration.</p>
+<p>We simulate data consisting of two samples with 100 observations
+each, for a total of 200 observations (rows).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(NAIR)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Welcome to NAIR: Network Analysis of Immune Repertoire.</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Get started using `vignette(&quot;NAIR&quot;, package = &quot;NAIR&quot;)`, or by visiting</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>dir_out <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>toy_data <span class="ot">&lt;-</span> <span class="fu">simulateToyData</span>()</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">head</span>(toy_data)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt;        CloneSeq CloneFrequency CloneCount SampleID</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; 1 TTGAGGAAATTCG    0.007873775       3095  Sample1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 2 GGAGATGAATCGG    0.007777102       3057  Sample1</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; 3 GTCGGGTAATTGG    0.009094910       3575  Sample1</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 4 GCCGGGTAATTCG    0.010160859       3994  Sample1</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 5 GAAAGAGAATTCG    0.009336593       3670  Sample1</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 6 AGGTGGGAATTCG    0.010369470       4076  Sample1</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">nrow</span>(toy_data)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; [1] 200</span></span></code></pre></div>
+</div>
+</div>
+<div id="required-arguments" class="section level1">
+<h1><a name="mainargs"></a> Required Arguments</h1>
+<ul>
+<li>The first parameter <code>data</code> accepts a data frame
+containing the AIRR-seq data, where each row corresponds to a single
+TCR/BCR clone (bulk data) or cell (single-cell data).</li>
+<li>The second parameter <code>seq_col</code> specifies the data column
+containing the receptor sequences to be used as the basis of similarity
+between two cells or clones. It accepts the column name as a character
+string or the column position index.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>)</span></code></pre></div>
+</div>
+<div id="filtering-the-input-data" class="section level1 tabset">
+<h1 class="tabset"><a name="input_options"></a> Filtering the Input
+Data</h1>
+<p>The following options are useful for removing noise or irrelevant
+data from the analysis, potentially improving the quality of the network
+graph and downstream analysis results.</p>
+<div id="sequence-length" class="section level4">
+<h4>Sequence Length</h4>
+<p>The <code>min_seq_length</code> parameter specifies the minimum
+TCR/BCR sequence length (in number of characters). Sequences with
+lengths below this value are dropped prior to analysis. An argument
+value of <code>NULL</code> bypasses this filter. This filter applies to
+the sequence in the column specified by <a href="#mainargs"><code>seq_col</code></a>.</p>
+<p>By default, <code>min_seq_length</code> is set to 3.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">min_seq_length =</span> <span class="dv">10</span>)</span></code></pre></div>
+</div>
+<div id="sequence-content" class="section level4">
+<h4>Sequence Content</h4>
+<p>The optional <code>drop_matches</code> parameter can be used to
+remove TCR/BCR sequences matching a specified pattern. It accepts a
+character string containing a regular expression specifying the pattern
+of content to search for. Each sequence in the column specified by <a href="#mainargs"><code>seq_col</code></a> is checked for a pattern match
+using <code>grep()</code>. If a match is found, the sequence is removed
+prior to analysis.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">drop_matches =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">W&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="network-settings" class="section level1 tabset">
+<h1 class="tabset"><a name="network_settings"></a> Network Settings</h1>
+<p>The following settings pertain to the network construction.</p>
+<div id="distance-function" class="section level4">
+<h4>Distance Function</h4>
+<p>The default method for quantifying the similarity between TCR/BCR
+sequences is the Hamming distance, which is computed using
+<code>hamDistBounded()</code>. It calculates the number of differences
+between two sequences of the same length. For each position in one
+sequence, the character in that position is checked to see whether it
+differs from the character in the same position of the other sequence.
+If the sequences have different lengths, the shorter sequence is
+extended by adding non-matching characters to make it the same length as
+the longer sequence.</p>
+<p>The Levenshtein distance, which is computed using
+<code>levDistBounded()</code>, can be used as an alternative measurement
+to determine the similarity between sequences. It calculates the minimum
+number of single-character edits (insertions, deletions and
+transformations) needed to transform one sequence into the other. This
+method is particularly useful for comparing sequences of different
+lengths and can account for insertions and deletions. When constructing
+a network based on the similarity of CDR-3 nucleotide sequences, it is
+preferable to use the Levenshtein distance instead of the default
+Hamming distance by specifying <code>dist_type = &quot;lev&quot;</code>. However,
+the Levenshtein distance requires significantly more computation than
+the Hamming distance, which may be challenging when working with large
+data sets having long TCR/BCR sequences.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">dist_type =</span> <span class="st">&quot;lev&quot;</span>)</span></code></pre></div>
+</div>
+<div id="distance-cutoff" class="section level4">
+<h4>Distance Cutoff</h4>
+<p>The function specified by <code>dist_type</code> quantifies the
+similarity between TCR/BCR sequences as a nonnegative distance, with
+values closer to 0 indicating greater similarity.</p>
+<p>Each node in the network graph corresponds to a row of the AIRR-Seq
+data. By default, two nodes are connected by an edge if the distance
+between their TCR/BCR sequences does not exceed 1. This cutoff value is
+specified by the <code>dist_cutoff</code> parameter, which controls the
+stringency of the network construction and affects the number and
+density of edges in the network. A lower cutoff requires greater
+sequence similarity to form an edge connection. If
+<code>dist_cutoff = 0</code>, two sequences must be identical in order
+for their nodes to be joined by an edge.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">dist_cutoff =</span> <span class="dv">0</span>)</span></code></pre></div>
+</div>
+<div id="keepremove-isolated-nodes" class="section level4">
+<h4><a name="isolated_nodes"></a> Keep/Remove Isolated Nodes</h4>
+<p>By default, only nodes that are joined by an edge connection to at
+least one other node will be kept in the network.</p>
+<p>If <code>drop_isolated_nodes = FALSE</code>, then all nodes are kept
+in the network, including those that do not have any edge connections to
+other nodes.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">drop_isolated_nodes =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="network-properties-and-cluster-analysis" class="section level1">
+<h1><a name="network_properties"></a> Network Properties and Cluster
+Analysis</h1>
+<p><code>buildRepSeqNetwork()</code> can perform additional analysis
+after constructing the network, including cluster analysis (partitioning
+the network graph into densely-connected subgraphs) and computation of
+network properties (which describe the structural organization of the
+network).</p>
+<div id="node-level-network-properties" class="section level3 tabset">
+<h3 class="tabset"><a name="node_properties"></a> Node-Level Network
+Properties</h3>
+<p>Node-level network properties pertain to individual nodes in the
+network graph.</p>
+<p>Some are local properties, meaning that their value for a given node
+depends only on a subset of the nodes in the network. One example is the
+network degree of a given node, which represents the number of other
+nodes that are directly joined to the given node by an edge
+connection.</p>
+<p>Other properties are global properties, meaning that their value for
+a given node depends on all of the nodes in the network. An example is
+the authority score of a node, which is computed using the entire graph
+adjacency matrix (if we denote this matrix by <span class="math inline">\(A\)</span>, then the principal eigenvector of
+<span class="math inline">\(A^T A\)</span> represents the authority
+scores of the network nodes).</p>
+<p>Node-level network properties can be computed when calling
+<code>buildRepSeqNetwork()</code> by setting
+<code>node_stats = TRUE</code>, or as a separate step using
+<code>addNodeStats()</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">node_stats =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>See <a href="node_properties.html">this vignette</a> for more details
+on computing node-level network properties.</p>
+</div>
+<div id="cluster-analysis" class="section level3 tabset">
+<h3 class="tabset"><a name="cluster_analysis"></a> Cluster Analysis</h3>
+<p>Cluster analysis uses a community-finding algorithm to partition the
+network graph into clusters (densely-connected subgraphs). These
+clusters represent groups of clones/cells with similar receptor
+sequences.</p>
+<p>Cluster analysis can be performed when calling
+<code>buildRepSeqNetwork()</code> by setting
+<code>cluster_stats = TRUE</code> or as a separate step using
+<code>addClusterStats()</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>, <span class="at">cluster_stats =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The cluster membership of each node is recorded as a variable in the
+node metadata. Cluster properties, such as node count and mean sequence
+length, are included in their own data frame within the output.</p>
+<p>See <a href="cluster_analysis.html">this vignette</a> for more
+details.</p>
+</div>
+</div>
+<div id="visualization" class="section level1">
+<h1>Visualization</h1>
+<p>Customized plots can be produced when calling
+<code>buildRepSeqNetwork()</code> or created afterward using
+<code>addPlots()</code>.</p>
+<p>Specify <code>print_plots = TRUE</code> to print the plots to the R
+plotting window.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">buildNet</span>(toy_data, <span class="st">&quot;CloneSeq&quot;</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>                <span class="at">node_stats =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>                <span class="at">color_nodes_by =</span> <span class="fu">c</span>(<span class="st">&quot;SampleID&quot;</span>, <span class="st">&quot;transitivity&quot;</span>, <span class="st">&quot;coreness&quot;</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>                <span class="at">color_scheme =</span> <span class="fu">c</span>(<span class="st">&quot;default&quot;</span>, <span class="st">&quot;plasma-1&quot;</span>, <span class="st">&quot;mako-1&quot;</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>                <span class="at">color_title =</span> <span class="fu">c</span>(<span class="st">&quot;&quot;</span>, <span class="st">&quot;Transitivity&quot;</span>, <span class="st">&quot;Coreness&quot;</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                <span class="at">size_nodes_by =</span> <span class="st">&quot;degree&quot;</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>                <span class="at">node_size_limits =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">1.5</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>                <span class="at">plot_title =</span> <span class="cn">NULL</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>                <span class="at">plot_subtitle =</span> <span class="cn">NULL</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>                <span class="at">print_plots =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA2AAAAKgCAMAAADK0+6WAAAAbFBMVEUAAAAAADoAAGYAOmYAOpAAZrYAv8Q6AAA6ADo6AGY6OpA6kNtmAABmADpmAGZmOgBmZjpmtv+QOgCQOjqQOmaQkDqQkGaQtpCQ2/+2ZgC2//++vr7bkDrb///4dm3/tmb/25D//7b//9v///+Tmi9XAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAfcklEQVR4nO3dDXucRpZAYSUbd5K1k1k7MxPb5bQl8///4zYNBQVUQdHNpe6F8z4TS/2hllbqs0ABxUsFQMxL6R8AODICAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERgkq7X0j8BCiMwSQR2egQmyZX+AVAagQmiLxCYIAIDgcmhLxCYHPoCgcmhL1QEJoa+UCMwGfSFOwKTQWC4sxGYuSMi6AsNK4HZesfa+mkhyEZgt3esM/SmNfSjQpiZwCo7iVn5ObEDQ4FZSczED4mdmArMRmIGfkTsRk9gsyOF/ZtWeWLWhmMgzFxgyhMzt0MBsvQENrtuNXxIcWJ6fzIUYTIwvYkp/bFQjKbAZt6e00duielbG6MvjKgKLP0GjT1wVbe9Q18Y0xVY6i0avdtp64vAMGE5MG3vZ20/DxTYLrBtVtjib9LYvU7bG1rZjwMVtAWWWFhF79L1jtb100CJLVcRN1lnywzMpZ5aFdrZS1+I2XYbTKow/YHRF6I2HuTYYiEWXx+M3JH6XgXe7PSFuM1HEUUKmxzIMfut9n+30xcSth+mf34h9mRgLMCgh8R+sKcTi68RTm7mD+kLoy+kyOxo3rowF7+VO6Qv6nKhLyQJHcnx7EIsvsga38gbcBR2uez9HWGI2KFSz73RHw6MpQlUkTsW8bmFWGKlcPg5gUE7yYN9tyssEdXycCNQlujR9M8sxHLWCpdGG4HShE9X2agwAoNR0ueDPbEQi60XpjfNYreB0uRPuHw8selya25wkb6g0B5nND/6xicwmLfLlAGPLsTGa4aZB3gAauw0J8dzhaWOPZwf8QDK22vSG/fQHFCDshb2ehEYFNptVqnHZjF0k3+nj04/B7TYb9q2q3tkU8wN/4k8GPkc0GLPeRHr68Cu7sAF/8Uem34K6LHrxKN1XmsbywuMvqDTzjP7Nit7q3Jw/n+JVxt9Bmiy99TZ7XjFmsZclZrEd/7UZqC83eem7w7KyG8seVnWxAEegBr7X/whWK/LC+OaHuGfnf0GKK/A1VXCsb+cxhYDoy+oVeLyRYOqMhpL76JO7SADlChzfbDRUbpLiSQfJzAoV+gCfOMTTWYbSz+a2kHWU3cVTJxLqStcTo+MTzc2G9h8mfqu44xzKXYJ2dihhfV9kSLWB+YalcLrOONcyl2jOXrsk4sNGc4FNl3XdMHTnbrrzOJkCl4EPfrWXxVYuAd6WFb/LQgMJRUMLD56GDlsIxVYE6OLptV/AwpDQSUDS5xDOY7FpVb06sDmhh8do/gorWxg0WlsxoujZGD1gEhq4VX1G2gUhnIKBxabGGrcTCqw7mnxyLovIjCUUzqw4ZGJ/uPoYKro1tr4SdM1y+l3AHZWPLDISV2jQYt4YLExw8FXcbYYFCgfmK8nNeJ+X0OMxZRYbfSvxunOUEBBYPXxFtdqvFI4ODNzukN5bu9zexBH+GygDBWBjfcuu3BgIxJYLLlq+IThBtpWPyiwks7Ams2ufv4Ol17ARbnRhhyFoRAVgdWHb4wWOX1hk8Ca9b/ZBVgwuQ47m1GSjsCq0VpduwhrSnFtbt1j2X31L8xB9ShDUWBBY11TPq9wH1k16C3yStVkkcVpYShETWC+sGCU3U8E7IJ1vrl5SP0LTY4PeezSLsDz9ATmd3g1y6igsCCwzL5GQyJPXCcaeI6iwLrC2n+CsQ4XHAbs5gMb9pU+UBjYg6bAfECu2w/mD+Jwwa7lFX1xPhhK0xFYOwbhfBLdwVLD1prnzI1whIPyjNCjPBWBdTuau1XBbvPLdSP2fS85CzD/dPpCUWoCG67/+SVXtz+sX37lLMC6QX3ZnxtYoiKw5kgOP7lGf/yG3yLrzljJ64szwaCGjsCCzS4XpHa/0SzdumH7mWr84VHD20BBagKr+qz8kLxr+2oKuzbzTaUXYN1AfnuTvlCensDCxPoBRB9Y87FKLpbuZ5SFO73ICxroCKwbk/Criv6A3lFgbqJ9gW6YhM0vqKIqsHYh1O1t7rfB+sD6rwn5gX76gi66AvOHGrpRPz60yFRS3aPBbmU2v6CFssCCHWDdob/hCP7wzqpfoQxHGMkLamgLbDCgGN3q6ja9hpth4SH3gBb6AutmhYqNa7RP6A+6D1YuHX1BHX2B+VW/Zmjw2q8VXv121jg4/xILx3kA+9MWmBuuIQZLsO5WNV479C/BuV9QR0Vg4dEXwXhGf5RUH1jlD1N0VWQVkb6gjKLAxsODkV1d1+AZ3df41yAw6KMhsOYQqC6c8YhhUNhw4dU/vZtZkcKgi4LAJmOF3XnN09bGC6lw8Xa/XeL/ACBJUWD3G/25y+O6/M7n8ZcPAqMw6KIgsHZGjkFM7R1+2eYPk/LTc4zSq/prpxMYVNEQWGe8TujPBUvtcR5/df8voIOiwAbLrip2qsrCNIcUBnX0BOYHMPqxwVFgVdXNQpp6hf5fsxZm0WeSfWOkAlv9Rui6Crex/ILLnwo2H9ghCkse3+x/I6V/QKwiF1hyWymmGyXst7HCuX2718opzHZgOBbpVcTFoYn7si7ynG5K+u7+bq/yTEEUBl323QaL5BYMEI6e2p/b7P/XLukoDGaUHOToBjKig+7+wnv+EivBHL9zAYUz35wPQyTalB9FjP/RgwtcVt0qYr9ZNvN6py6MIRJtygcWF07mG2yFdaHNfGX3D1Cc3sD8qIYf6Ki6tliEwQylgXULsG4kseqvxTeavG36xRWFQQm1gflZosK0nKuCTbOZryYwKKE6sP7gjXZIsZ9xaj4gCoMSOgPrF2D9FljVD9dTGKxQG1iXiOtv9Vtmi9NvMMEUVNAaWF9INyF9t8fZ9felX4FF2FqXy+zD7EN7iMrABkcc9jGFfbEI29zlwk7q7SkNLFhC9YcpBgdzUBhsUBpYWEd/HHB/SvP04ODIq1AYitMY2OiUlCAl19eWUxiBoTSlgbnhzcFDXWGLWwUUhtIUBjZeNg1uBuuG3VyIcy+18c8GrGMusG7Q3g0mLE29lMhPCOTSGdjg9nA51Z270j0QjiVPXitzcJkhaMjQF9i0r/DiEINhjukw4Ti26GpkbB8PhUGExsCGt/2ko8ETnH/e/DH1rl+NHIg895ozKgmspi2w+1TZ47tG22XNBG6Jo6Emi7Ccbvx+NiLDxpQFNjcy2EVTb1i54WmVM4unnOvyjYYp1/3MQJqhwO78ep/f6Zxe6+u/ZPG43/HDRIatqArsHs/yWzu8GnrOq1ZL4/WxB4kMW9ATmPMnfS0/9X61sOaLsl65efn5xxM/EpHhKUoC81tX3T/zz+5yyXv/L8S4OBaZ9U2ACA2B9W/h7MCqwVdkPL/5Polvv/j19U+4cD4iEFM8sMH4++BD+kuCKNYswhItZb4EgeEBRQMbrX65ySeJLwvO9cpcfZt5adYAIahcYJNtm8mSLPWF4Tri2sCmPdEXBBUKLHZcbuLz6ddW4U7m1YWNEmMBBkklAouOy7nkjekzw7GQ9YGNWiaw3ZxxM3b3wBKj3snVxdgzw2H33D4Siy362hGBSUvuU5pdYRw/Mlh2ZQcyfGK3I43AdnTCX/ZegV2vs3OF5gc22Qf20CLM36avPZ3xl71fYHO/3aVtssH9o9HGBxdhVXetFuzljL/s/VYR5zersp++XWB1XpzIvCcCE7XyWMDUvZPh/CcKY6qAPZ2xLw2Brbr/mcAiK4n0tSMCE7ZmSZV4YDzPjUs8L+8V2QLb1Sl/27sO06881DY69PFMYImheuzinL/tnfeDZd2Vfmg6UdszhRHYrs752975SI4VO5Tjz94wMPra1zl/3XsfKpV/SFTs0eikUav+csmDfiHspL/tsoEt/dInOWZsluW+In3t66S/7v0P9k18vvzsRBOPLsJO+gcv5qS/7/1PV3GRzzKeXCWXVSuvZMlRvkWc9ddd4HwwN/qY9eT75zkHd+S+4ln/4KWc9fdd5ITL4N+857afJ75k5cKIw+hLOOvvu8iUAWuOcMoYlVh7tfOVQ/vYwGl/38UCW3+Ibnqhs34RxgJsZ6f9fZeZ9CZnBnqv22RLf8naXNYu8vC00/7CSwW24skZw35rA1vRNzZwxsk4WsVn9l3WjonMNbHytC5OA9sZgam2POy3Nhj62tl51xgsBMawn3Un/uNZCYxhP8tO/MczERjDfsad+K9nJDCG/Uw78V/PRmAM+5l24r6MBMawn2kEph3bYKad+Y9HYJB26r+dicBWnrQMXU79tyMwSDv1385CYGtOH4M+p/7TERiEnfsvZyCwNTMMQJ9z/+XMBHbyv5Nh5/7D6Q9s1SRUUOfkfzcCg6yT/93UB8ZMvMZp+Lt9//lrqW9tJzAVfymspuHPRmBJLvoprNAxGweBJRGYbeUDe/vw8tN/b4H9+PTyUndW3/7796+vv//ndtPf6T9uT3lgLnkDyPH24f3tvzqld1X17Zd//O3XX9/VXTV3+o8C35/AlCr///qP4b52+O3nr9+bpddHf/v114/tg/7O20eB7687sHWX6zuUpcDoL899ufT6+9dvL3fv/e3X3z7fHvR3th8Fvj+BqeSWzoC7XC6u1t7a4UcyqgusXQEcBhbeKUN1YOP32FkKcxkTQV5cOx/rzYX1yaT72t/tn+8/fR7cvgfW3dl+FEBg2vjF0sL/seFcke5yit/MQ94+vGsHOW5LqVtI3SBHHZi/038U+P6aA5u8a07wNnK5O9bD+cQ5IXVGOExfJ9TevgfW3ek/bo/ANBnMX5wRWPMVnC+31ne5ba4xxYFF3jIHfhfdNqNG04NnBZa9SolGvSJ43+21EwJT4jLZjsoMrCsMWeoh+f36UhxY7F1z6HfSw4HlDTuiCFuBHftN5GZvpp7cX5/w0L8cq9QGFn+3HPs99Ng2mP/I7KwaEZgmKwqLnOhd73Le+ifCk7QGlnhzHTywFQc3R2dS4JAOdYwFdqrCcgIbFskSTB2lgSXfW0cPLPsM00hgh//dWERg2mQeKzXZu8zeMJV0BjbzXjn+2yhvHq1xYMf/vdhEYPpkFTY8AJHFl1YaA5u9IPMZ3knREcLYc3KeiKIITKPYEGHkKcER9VBKY2CzZus7jOUD5F3Ws1Aagem0eI6Xo68t1MfWi85Kai6ws1g6Pr4NjNXD53yRmKotRGBaLRwe7xYTxNj0zf7jL7HZbpLfE0rMF1YHxuJrldva4Piutw+3O0UXYgSm1+z5J5ydst70zV5PfSO7FCMwxeaO3b2w+NqK6HYYgSk2c/YJJ6Zsh8BOKx0RJ6Zsop6/7ce/GaY/mPylz4nPKtjHN6kJRz0CK+D5wOjLCgIrIneEgsCsI7BCniqMvswgsFLyFmLnmx3yYAisnJzECMw4AivpscLoyxACK2p5IUZgthFYYUu1TB+nL0sIrLSlhdjkYQKzhMDKy7zKQ4uDEE0hMAVmF2LjixoRmCkEpsJcYqNLrnAemCkEpkS6mtEVVxamEoAuBKZF+tIogws8LE43BVUITI3L5eJcd0XzoLbIFR4obDOvv3+9z83xyz8iL09gelzai5nXwjOWwys8MFn246Zz3tx8r6dF/PHpY/Xtncw3FXlVPCKc59CFc25wjYctvERmlaq+/PT3bQn29ufXZkkm8F0lXhSPabavnJ/wcHKVlbAvUlsrGlizivj6v/9Ub3+InNlMYIr0IQ1nxY6uF1LYWtG+7oHVU3MQ2PEFq4JtYYMxjdEKIoVtgiXYeYTrhC4ckI9f5oHCtvDKNthpjFYFu42x1LVWmLttA3VYPz69ZxTxBCbbWs71mU1HEB2zj26A/WAnMl0VdM4fHDW6974KGe2L6jQhME2iq4J1SpdLMMLo3OD5YwSmCYFpktzWqlcG3aCtKv7U1J0ohMA0SV1Trw4sdn/ufSiGwDSJnIrSLLYSq33MiKMegWkyDCxcJcyd4Ze+lCEwVbpDN8abW4lw2PesHYGpcnHTtu4Sx9ETlHYEpkliLKPKDYze1CEwVWYuaZlxL33pQ2CqZE59E783uMHOZi0ITJVnAgs/JzAtCEyVJwKLTI2D8ghMlccDCz4jL0UITJV0HAuBMS/Oo+6nq3x7ealnlxJAYKrMBDZ7YG9sWhyMRCe9uU/bVn35KPZNpV4YD3ksMDf3HDReYtNKNdO2/fhLZD6O+3eVemE85KHAonPiYCQaWDsnx4fbQzILMQLTZWVgbHvlmwns9bfPUksxAtMlejbY/YF0YNEJOzCRnnj0TmY7jMB0iYQyvCjE9PmOvJ5BYMeUfQple1kj541fJZUe8viZfX/8m2H6I0kcNx+b8Wb4iAtSS00lgHx+P9hPMgOJBFZM/Lyv5FMi8yI2k+FAMwIrKLJpNZz9cOkAQ3e5sIKoG4EV5arRNtRwiRV/ZHTPisJY3u2OwMpqr2k5vN3dP3nm4Pb8hDgxBLY7AivNXzY2uBW91PloEhwXqTLrW2FXBFaeP9Kp/lgvY8LIgmcNt8fWTxZAXiUQmAL94qsfd09tcTWPTWJZjIe8yiAwFXxh98Amm1/NY8EpKbEBxdmAyKsUAtOh3XXsuos8RAbwuzXHtXMkklc5BFaaj8kFhxX6ewY7mv3mWTKX1OGK5FUQgZXR1DJcTnWZ+cjae/31H5rNs7lcVq86QhqBlRE5Qt5fRiUcfnf9Q81hUQu9TA9l3OSnxcMIrCgXqG93Bxc6N36oPixq5WAheZVHYEq4bjE1XrQ1ox8uY/nVvlD3dQI/JlYiMBW67S1/MNNoAebTy9mjzAwdmhCYBv2xHPGTxPpNsKzCHMfYq0FgCgQ7uFLjgK49MyWrsNlJBrArAisuOKA+es5X1Z04lllYO8nAZD2z4nD6/RFYacH5KpF42q5cf9D94hw3iRVN16xobvATY4XygV2vzzyswjNv2/DQjGkZrl/AtWewuPSxUt2XcCU+PTQE5ubYCOzRd7QbLI8i51R2q45+l/NCQbEzyVBQ+cCO4bERheHq3mgB1g9ThAstN7wZ/zEITA0C28oDiU2OlYo/6KqwqLnC3OgjiiOw7awcGJ88fXjg73DNcbCgawY7ogMi3VOgA4FtKj+xyL5gFzw2Osh+fDFmFxkrHJzyDCUIbGN5izHn9wXHDGcTjQxbuHalMbmCSWBqENj2ZhPze32nI/v9lw0eiw4LDqeimnxPAlODwCTEE1s4fCn+UGLcfXTkx+h1CUwNApMxGSBcXHVMRdl8SDzg4qexEJgaBCamPj+5XyVcfvrMvdFjFP3RhZH56QlMDQITtOriQnM7tmYWbu0pmhmvhRIITJBbcYxidCnn5gLrCuuOt+8WlhzSqwaByVm32zlyX7f8Sx0Y1c6iOLhvMs6PkghMzLr1tMhxvl0nqVe6n+Xs3GTqHJZgehCYlHV9jeeSau5cOHY3NkUOdJENbGFV5chrMiv7ipXSngg281p+HhwKU0s6sNlzvQ4c2Nq3fOwkfz9En/4tudxZBFAKq4gitnjH+22rmSELHxiFqUVgEjZ5v3dDiDNLsGaODgLTi8AEbNvX3FP66XC2+JbYHoFpNbuPuX2sXz8kMKUIbHt7LsC69UMK04nANrfNWz1zAVaxjqgbgW1tt776wFhJ1IvANrbR+3z+EI72wS4wBhLVIrBt7ddXf6g94xyKEdimtnqT54xbhIGxCNOKwLa02Xs8Y4k0mtGewnQisM08PkP9RM4aXzDNaL8tBm0IbDMbHrqcFVj/mV+hpDB9CEyhdQuwmauLoTgCUyhnYRQ+oTvxmcLUITB9svoKntFPLUBg6hCYPjlLom4I0TXTL2Z/IfZFYOpkZdKMa8xdAAkqEJg6OZVMp2vL/1rsicC0yVmApWcRIDBlCEybrIVQepYOCtOFwHR5+nCQNdN1Qx6B6fL04SDdpTM3+XHwLAI7mm7MfjrF4qFnelWKwI5m5uqaLnKlo61dr7Kvbw2BHczyIKQTXYUksCECO5jsozkkMmsmQkWAwA5m5Vkr3eLs6c0znyuBDRDYwTx2Wli7efbwEs0F51cjRGDH8uzsN9Nr+S0v2QZdGgvs7cPLy89f04+//v41cSMTgR3Llmtp/cBjetEWvaiZUtfpAMzbh49V9e2Xf5JfEzb1fTbFBAI7FrHNoOlOtev0aH6h772N63Va2L2ftz8+V6+/vrx8rH789d+Xl/ffb/9Vb3/+5+Wnz/cn3JZydVlffvqbJdjp7TLOcK8ssjzY43s/LhbYj0/N0uve2O9ff3x6d0vtXf3p24df/vn+89c6sC/vq2/v6mexioicGUs3co2eL7PHd35MLLB6va9eUNXe/vz646/PVf3frbd65fH2aZ3aLb7bYxWBIWtK++2/3ew9eiSWudXrb7fCvtSDHWFgf9R3frwvy17aCAns9PYeLJ98H82BRXy/r/p9+Vgvr+pVxGFg7RLsT58VgZ3e7nujJpMW7PWNt3EfRby1VKdzW5ANVhHfVd9/+afdBvt+31QjsNMrsLvXzCh9VL3+V6/+fXt5+Z9/fRwswf4vGEVsNtMI7Oxc5LMdv+m+31fWfRtsAwR2JEUCG0wyvOO3lUVgmCr1TneTT9AisCPp3987n7vMob4pBHYgg+m0d/7WO+7hNoXADqToQe2cDBZFYAcyuiTf/t+dviYI7EAKbwk55uOYIrAD2flIxAkCmyKw42jHGVhP04TAjoNhBoUI7DienY8DAgjsOBjGU4jADsOx+aUQgR3Gsxc+OqUV07Y18+KsRWBHkb7qJRqR39CKadvu8+L8tvoQewI7DJZg8y6XaWErpm27zy7wZfUijMCOgiGOBbHA1k3b9shJYgR2FPdBehJLiwW2btq2H5/er/6uBHYUnC+yJLWVmjtt29uH9X0R2GGUPhDRpDXTtr3+un4MkcAOg7P2H7Fi2rbH+iKwozjixDM7yJ+27faMlwd2hBHYQdi9RJdOzCqF0HByQhJ7GoEhZHsG6wMjsGMYF0VhShDYIdi6jtCZENgh2LoU3pkQ2CHEamKoQwMCO4R4SxRWHoEdQaokThErjsCOgMDUIrAjYF1QLQI7APrSi8AOgMD0IrADIDC9CMw++lKMwOwjMMUIzD4CU4zA7CMwxQjMOnYmq0Zg1hGYagRmHmuImhGYeQSmGYGZR2CaEZh5BKYZgZlHYJoRmHkEphmBWUdfqhGYdQSmGoFZR2CqEZh1BKYagVlHYKoRmHUEphqBWUdgqhGYdQSmGoFZR2CqEZh1BKYagVlHYKoRmHUEphqBWUdgqhGYcfSlG4EZR2C6EZhxBKYbgRlHYLoRmHEEphuB2ca0o8oRmG0EphyBGccqom4EZhyB6UZgxhGYbgRmHIHpRmDGEZhuBGYcgelGYMYRmG4EZhyB6UZgxhGYbgRmHIHpRmDGEZhuBGYcgelGYLbRl3IEZhuBKUdgthGYcgRmG4EpR2C2EZhyBGYbgSlHYLYRmHIEZhuBKUdgthGYcgRmG4EpR2C2EZhyZw3sen3mYTWYFlG78wbm5hAYtnHWwI6CVUTlCMw2AlOOwGwjMOUIzDYCU47AbCMw5QjMNgJTjsBMoy/tCMw0AtOOwEwjMO0IzDQC047ATCMw7QjMNALTjsBMsxnYQU5lyEJgplkN7BCnMmQhMNNsBnYmBGYagWlHYKYRmHYEZhqBaUdgltGXegRmGYGpR2CWEZh6BGYZgalHYJYRmHoEZtmRDnk4KAIz7Hqog4qOicAMc/SlHoEZ5tgIU4/A7HKMcuhHYHa5isLUIzCzXPcP9CIwswjMAgKzyg0+QCkCs4rATCAwo9zkE2hEYEYRmA0EZpOLfAaFCMwkl/gc2hCYSQRmBYFZ5JI3oAyBWeRmbkEVAjPIzd6EJgRm0LgoCtOLwOyZ9ERgehGYPQRmCIGZE8mJwtQiMGMuFwKzhMCMuQXWCe4s+BNhDoEZ1pVGYGoRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwLCl6/WZhw+IwLCl69XNITAAGyIwQBCBAYIIDBBEYIAgAgMEERggiMAAQQQGCCIwQBCBAYIIDBBEYIAgAgMEERh2tXTCytFOaCEw7GrhhLHDnTFGYIAgAgMEERggiMAAQQQGCCIwQBCBAYIIDBBEYIAgAgMEERggiMAAQQQGCCIwQBCBAYIIDBBEYIAgAgMEERggiMAAQQQGCCIwQBCBAYIIDFpcLs89rhKBQYvLZX5OUgIDMERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYIIjBAEIEBgggMEERggCACAwQRGCCIwABBBAYI+n/ADRR44BQVMwAAAABJRU5ErkJggg==" width="100%" style="display: block; margin: auto;" /><img src="data:image/png;base64,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isCiQGBWEVgUCMwqAosCgVlFYFEgMKsILAoEZhWBRYHArCKwKBCYVQQWBQKzisBiQF9mEVgMCMwsAosBgZlFYDEgMLMILAYEZtaGAzs7O266HYyKaNemA3O9CAzH23BgEWEV0SwCiwGBmUVgMSAwswgsBgRmFoHFgMDMIrAYEJhZBBYDAjOLwGJAYGYRWAwIzCwCiwGBmUVgMSAwswgsBgRmFoFFYL19xXNGgw+BRWDNgcVyRoMPgUVgvYHFj8AiQGB2EVgECMwuAosAgdlFYBEgMLsILAIEZheBRYDA7CKwCBCYXQQWAQKzi8AicBH6BcCLwNbv4oLCzCKw9XP0ZReBrZ9jI8wuAls9x14Owwhs9VxCYXYR2Nq58h8YRGBrR2CmEdjKucYXWENgK0dgthHYurnONzCFwNaNwIwjsFVzwnewhMDWzHm+hxkEtmYEZh6BrZjz3oAVBLZirucWbCCw9XK9N2ECga1XuygKM4jAVqvTE4EZRGCrRWBrQGBrJeREYfYQ2DqdnhLYKhDYOqWBlWp3BnxFEBHY+pWlEZg9BAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjCoODs7bnosCAwqzs5cLwIDcDQCAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEhkG2cMUZgCGQbZ4wRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICg0EDYyKuaMhEAoNBA4OSEhiADIEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKCIwABFBAYoIjBAEYEBiggMUERggCICAxQRGKDo/wH8KSPipnHJhwAAAABJRU5ErkJggg==" width="100%" style="display: block; margin: auto;" /><img src="data:image/png;base64,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" width="100%" style="display: block; margin: auto;" /></p>
+<p>See <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/network_visualization.html">this
+article</a> for more on how to customize the visualizations.</p>
+</div>
+<div id="output" class="section level1 tabset">
+<h1 class="tabset"><a name="base_output"></a> Output</h1>
+<p>The function returns a list with the following elements:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">names</span>(net)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;details&quot;          &quot;igraph&quot;           &quot;adjacency_matrix&quot; &quot;node_data&quot;       </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; [5] &quot;plots&quot;</span></span></code></pre></div>
+<p>We describe each element below.</p>
+<div id="network-metadata" class="section level4">
+<h4>Network Metadata</h4>
+<p><code>details</code> records argument values supplied in the call to
+<code>buildRepSeqNetwork()</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>net<span class="sc">$</span>details</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; $seq_col</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; [1] &quot;CloneSeq&quot;</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; $dist_type</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;hamming&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; $dist_cutoff</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; $drop_isolated_nodes</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; $nodes_in_network</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt; [1] 122</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; $min_seq_length</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; $drop_matches</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NULL&quot;</span></span></code></pre></div>
+<p><code>nodes_in_network</code> records the number of nodes in the
+network. Additional network information is included when <a href="#cluster_analysis">cluster analysis</a> is performed.</p>
+</div>
+<div id="node-metadata" class="section level4">
+<h4>Node Metadata</h4>
+<p><code>node_data</code> is a data frame containing metadata for the
+network nodes, where each row corresponds to a node in the network
+graph:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">head</span>(net<span class="sc">$</span>node_data)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt;         CloneSeq CloneFrequency CloneCount SampleID degree transitivity</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; 2  GGAGATGAATCGG    0.007777102       3057  Sample1      1          NaN</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; 5  GAAAGAGAATTCG    0.009336593       3670  Sample1      3    0.3333333</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; 8  GGGGAGAAATTGG    0.006220155       2445  Sample1      2    1.0000000</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; 11 GGGGGAGAATTGC    0.012969469       5098  Sample1      4    0.6666667</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; 12 GGGGGGGAATTGC    0.009079646       3569  Sample1     10    0.3555556</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; 13 AGGGGGAAATTGG    0.014941093       5873  Sample1      5    0.1000000</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;    eigen_centrality centrality_by_eigen betweenness centrality_by_betweenness</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; 2        0.00000000          0.00000000    0.000000                  0.000000</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; 5        0.00000000          0.00000000  108.000000                108.000000</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; 8        0.04558649          0.04558649    0.000000                  0.000000</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt; 11       0.15055366          0.15055366    1.549451                  1.549451</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co">#&gt; 12       0.52691798          0.52691798   73.970918                 73.970918</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#&gt; 13       0.14682343          0.14682343   75.439560                 75.439560</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#&gt;    authority_score coreness   page_rank</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; 2       0.00000000        1 0.008196721</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; 5       0.00000000        2 0.010578507</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; 8       0.04558649        2 0.003936684</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; 11      0.15055366        4 0.005034736</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; 12      0.52691798        6 0.011491588</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co">#&gt; 13      0.14682343        3 0.008703523</span></span></code></pre></div>
+<p><a name="subset_cols"></a></p>
+<p>Since <code>buildNet()</code> was called with <a href="#isolated_nodes"><code>drop_isolated_nodes = TRUE</code></a>, some
+of the original rows are missing. The original row names are preserved,
+facilitating cross-referencing with the original data.</p>
+<p>By default, all variables from the original input data are present.
+To include only a subset of the original variables, specify those to
+keep using the <code>subset_cols</code> parameter, which accepts a
+character vector of column names or a vector of column indices. The
+sequence column is always included.</p>
+<p>Variables for <a href="#node_properties">node-level network
+properties</a> will also be present if computed, as seen <a href="node_properties.html#results">here</a>.</p>
+<p>Variables present in the node metadata can be used to <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/network_visualization.html#node-colors">encode
+node colors</a> in visualizations.</p>
+</div>
+<div id="cluster-metadata" class="section level4">
+<h4>Cluster Metadata</h4>
+<p>If <code>buildRepSeqNetwork()</code> is called with <a href="#cluster_analysis"><code>cluster_stats = TRUE</code></a>, the
+returned list will contain a data frame <code>cluster_data</code> with
+cluster properties such as node count and mean sequence length, as seen
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/cluster_analysis.html#cluster-properties">here</a>.</p>
+</div>
+<div id="visual-plots" class="section level4">
+<h4>Visual Plots</h4>
+<p><code>plots</code> is a list containing any plots created as well as
+a matrix <code>graph_layout</code> storing the node layout used in the
+plots. Each plot is named according to the variable used to color the
+nodes.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">names</span>(net<span class="sc">$</span>plots)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;SampleID&quot;     &quot;transitivity&quot; &quot;coreness&quot;     &quot;graph_layout&quot;</span></span></code></pre></div>
+<p>Each plot is a <a href="https://ggraph.data-imaginist.com/"><code>ggraph</code></a> (a
+special kind of <a href="https://ggplot2.tidyverse.org/"><code>ggplot</code></a>).</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">class</span>(net<span class="sc">$</span>plots<span class="sc">$</span>uniform_color)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;NULL&quot;</span></span></code></pre></div>
+<p>Custom plots can be created when calling <code>buildNet()</code> or
+afterward using <code>addPlots()</code> as described <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/network_visualization.html">here</a>.</p>
+</div>
+<div id="network-graph-and-adjacency-matrix" class="section level4">
+<h4>Network Graph and Adjacency Matrix</h4>
+<p><code>igraph</code> is an object of class <a href="https://r.igraph.org"><code>igraph</code></a> and
+<code>adjacency_matrix</code> is a <a href="https://www.rdocumentation.org/packages/Matrix/versions/1.5-4/topics/dgCMatrix-class"><code>dgCMatrix</code></a>.
+Both objects encode the nodes and edges of the network graph, each using
+a different format. These objects are used by other <code>NAIR</code>
+functions, and are typically not of direct importance to the user.</p>
+</div>
+</div>
+<div id="saving-output" class="section level1 tabset">
+<h1 class="tabset"><a name="output_settings"></a> Saving Output</h1>
+<div id="output-directory" class="section level4">
+<h4>Output Directory</h4>
+<p><code>buildRepSeqNetwork()</code> writes its output to files if a
+directory path is provided to the <code>output_dir</code> parameter. The
+specified output directory will be created if it does not already
+exist.</p>
+</div>
+<div id="output-file-format" class="section level4">
+<h4><a name="output_format"></a> Output File Format</h4>
+<ul>
+<li>By default, the list returned by <code>buildRepSeqNetwork()</code>
+is saved as a compressed RDS file.</li>
+<li>If the file will be transferred across machines, the RData format is
+preferred. It can be used by specifying
+<code>output_type = &quot;rda&quot;</code>. The list will be named
+<code>net</code> in the R environment.</li>
+<li>To use the results outside of R, specify
+<code>output_type = &quot;individual&quot;</code>. Each list element will be saved
+as a separate file using the following formats:
+<ul>
+<li><code>.csv</code> for <code>node_data</code> and
+<code>cluster_data</code> (using <code>write.csv()</code>, with
+<code>row.names = FALSE</code> for <code>cluster_data</code>)</li>
+<li><code>.mtx</code> for <code>adjacency_matrix</code></li>
+<li><code>.txt</code> for <code>details</code>, <code>igraph</code> and
+<code>plots$graph_layout</code></li>
+<li><code>.rda</code> (RData) for <code>plots</code></li>
+</ul></li>
+<li>Regardless of <code>output_type</code>, plots are printed to a pdf
+file containing one plot per page. The dimensions (in inches) for each
+page can be adjusted using the <code>plot_width</code> and
+<code>plot_height</code> parameters, with the defaults being
+<code>12</code> and <code>10</code>, respectively.</li>
+</ul>
+</div>
+<div id="output-file-names" class="section level4">
+<h4><a name="output_filenames"></a> Output File Name(s)</h4>
+<p>By default, the name of each saved file begins with
+<code>MyRepSeqNetwork</code>. This prefix can be changed using the
+<code>output_name</code> parameter, which accepts a character
+string.</p>
+<p>When <code>output_type</code> is <code>&quot;rds&quot;</code> or
+<code>&quot;rda&quot;</code>, only two files are saved (the data file and the
+pdf). For each file, <code>output_name</code> is followed by the
+appropriate file extension. For example, if
+<code>output_name = &quot;NetworkABC&quot;</code> and
+<code>output_type = &quot;rds&quot;</code>, then the files will be named
+<code>NetworkABC.rds</code> and <code>NetworkABC.pdf</code>.</p>
+<ul>
+<li>If <code>output_type = &quot;individual&quot;</code>, the prefix specified by
+<code>output_name</code> is followed by:
+<ul>
+<li><code>_Details.txt</code> for <code>details</code></li>
+<li><code>_EdgeList.txt</code> for <code>igraph</code></li>
+<li><code>_AdjacencyMatrix.mtx</code> for
+<code>adjacency_matrix</code></li>
+<li><code>_NodeMetadata.csv</code> for <code>node_data</code></li>
+<li><code>_ClusterMetadata.csv</code> for <code>cluster_data</code> (if
+present)</li>
+<li><code>_Plots.rda</code> for the list <code>plots</code></li>
+<li><code>.pdf</code> for the pdf of the plots</li>
+<li><code>_GraphLayout.txt</code> for
+<code>plots$graph_layout</code></li>
+</ul></li>
+</ul>
+<p>For example, if <code>output_name = &quot;NetworkABC&quot;</code> and
+<code>output_type = &quot;individual&quot;</code>, then the node metadata is saved
+as <code>NetworkABC_NodeMetadata.csv</code>, the pdf is saved as
+<code>NetworkABC.pdf</code>, the list <code>plots</code> is saved as
+<code>NetworkABC_Plots.rds</code>, and so on.</p>
+</div>
+</div>
+<div id="supplementary-functions" class="section level1 tabset">
+<h1 class="tabset"><a name="downstream"></a> Supplementary
+Functions</h1>
+<p>The <code>NAIR</code> package contains a number of functions
+supplementary to <code>buildRepSeqNetwork()</code> that can be used to
+perform additional downstream tasks. See <a href="supplementary.html">this vignette</a>.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">library</span>(magrittr) <span class="co"># For pipe operator (%&gt;%)</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>toy_data <span class="sc">%&gt;%</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="fu">filterInputData</span>(<span class="st">&quot;CloneSeq&quot;</span>, <span class="at">drop_matches =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">W&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="fu">buildNet</span>(<span class="st">&quot;CloneSeq&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="fu">addNodeStats</span>(<span class="st">&quot;all&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="fu">addClusterMembership</span>(<span class="st">&quot;greedy&quot;</span>, <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_greedy&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>  <span class="fu">addClusterMembership</span>(<span class="st">&quot;leiden&quot;</span>, <span class="at">cluster_id_name =</span> <span class="st">&quot;cluster_leiden&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>  <span class="fu">addClusterStats</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="st">&quot;CloneSeq&quot;</span>, <span class="st">&quot;CloneCount&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>  <span class="fu">addPlots</span>(<span class="at">color_nodes_by =</span> <span class="fu">c</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="st">&quot;cluster_greedy&quot;</span>), </span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>           <span class="at">color_scheme =</span> <span class="st">&quot;Viridis&quot;</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>  <span class="fu">labelClusters</span>(<span class="st">&quot;cluster_leiden&quot;</span>, <span class="at">cluster_id_col =</span> <span class="st">&quot;cluster_leiden&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>  <span class="fu">labelClusters</span>(<span class="st">&quot;cluster_greedy&quot;</span>, <span class="at">cluster_id_col =</span> <span class="st">&quot;cluster_greedy&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>  <span class="fu">saveNetwork</span>(<span class="at">output_dir =</span> <span class="fu">tempdir</span>(), <span class="at">output_name =</span> <span class="st">&quot;my_network&quot;</span>)</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

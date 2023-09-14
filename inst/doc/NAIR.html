@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to the NAIR package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to the NAIR package</h1>
+
+
+
+<div id="nair-network-analysis-of-immune-repertoire" class="section level1">
+<h1>NAIR: Network Analysis of Immune Repertoire</h1>
+<p><code>NAIR</code> is an R package for analyzing the adaptive immune
+repertoire using network analysis based on similarities among receptor
+sequences. It implements methods from the following paper:</p>
+<p><a href="https://www.frontiersin.org/articles/10.3389/fimmu.2023.1181825/full">Hai
+Yang, Jason Cham, Brian Neal, Zenghua Fan, Tao He and Li Zhang. (2023).
+NAIR: Network Analysis of Immune Repertoire. <em>Frontiers in
+Immunology</em>, vol. 14.
+https://doi.org/10.3389/fimmu.2023.1181825</a></p>
+<p><code>NAIR</code> allows users to perform network analysis on
+Adaptive Immune Receptor Repertoire Sequencing (AIRR-Seq) data,
+including computing local and global network properties of nodes and
+clusters, which can provide insights into the structural organization of
+the immune repertoire network.</p>
+<p><code>NAIR</code> also enables users to search across multiple
+AIRR-Seq samples for clones/clusters associated with subject
+characteristics, disease conditions or clinical outcomes, as well as
+identify public clones/clusters. This can help researchers identify
+potentially important TCR/BCR clones.</p>
+<p>To aid in interpretation of the immune repertoire network,
+<code>NAIR</code> includes convenient functionality for generating
+customized network visualizations.</p>
+<div id="what-data-does-nair-support" class="section level4">
+<h4>What data does <code>NAIR</code> support?</h4>
+<p><code>NAIR</code> supports bulk and single-cell immune repertoire
+sequence data for T-cell or B-cell receptors (TCR or BCR).</p>
+<ul>
+<li><strong>Single-cell data:</strong> Each row is a single cell</li>
+<li><strong>Bulk data:</strong> Each row is a distinct TCR/BCR clone
+(unique combination of V-D-J genes and nucleotide sequence) and
+typically includes a corresponding measurement of clonal abundance
+(e.g., clone count and clone frequency/fraction)</li>
+</ul>
+</div>
+<div id="how-does-nair-model-and-analyze-the-adaptive-immune-receptor-repertoire-as-a-network" class="section level4">
+<h4>How does <code>NAIR</code> model and analyze the adaptive immune
+receptor repertoire as a network?</h4>
+<ul>
+<li>Each cell (single-cell data) or clone (bulk data) is modeled as a
+node (vertex) in the network</li>
+<li>For each node, we consider the corresponding receptor sequence
+(nucleotide or amino acid)</li>
+<li>For each pair of nodes, we measure the similarity in their receptor
+sequences (using the Hamming or Levenshtein distance)</li>
+<li>An edge is drawn between two nodes if the distance is below a
+specified threshold
+<ul>
+<li>For single-cell data, sequences from two chains (e.g., alpha chain
+and beta chain) can be jointly used to determine similarity between
+cells, considering cells as similar when the sequences for both chains
+are similar (i.e., when the distance for each chain is below the
+threshold)</li>
+</ul></li>
+<li>Clustering analysis is used to partition the network graph into
+clusters (densely-connected subgraphs)
+<ul>
+<li>Many clustering algorithms are available, with each seeking to
+identify the “best” configuration of clusters according to different
+graph criteria</li>
+</ul></li>
+<li>Network statistics characterize the repertoire in terms of the local
+and global structural properties of its graph</li>
+<li>Customized visual plots of the network graph are generated, with
+nodes colored according to desired metadata (e.g., disease status,
+sample, cluster, clonal abundance, etc.)</li>
+</ul>
+</div>
+</div>
+<div id="getting-started" class="section level1">
+<h1>Getting Started</h1>
+<div id="main-function" class="section level3">
+<h3>Main Function</h3>
+<p>General network analysis on AIRR-Seq data is performed using
+<code>buildRepSeqNetwork()</code> or its convenient alias
+<code>buildNet()</code>. This function does the following:</p>
+<ul>
+<li>Filters the AIRR-Seq data according to user specifications</li>
+<li>Builds the network graph for the immune repertoire</li>
+<li>Performs additional network analysis, which can include:
+<ul>
+<li>Cluster analysis</li>
+<li>Network properties</li>
+<li>Customizable visual plots of the network graph</li>
+</ul></li>
+<li>Returns (and optionally saves) the following output:
+<ul>
+<li>The network graph (as <code>igraph</code> and adjacency matrix)</li>
+<li>Metadata for the network</li>
+<li>Metadata for the nodes in the network</li>
+<li>Metadata for the clusters in the network</li>
+<li>Plots of the network graph</li>
+</ul></li>
+</ul>
+<p>See <a href="buildRepSeqNetwork.html">this vignette</a> for a
+tutorial.</p>
+</div>
+<div id="searching-for-associated-clusters" class="section level3">
+<h3>Searching for Associated Clusters</h3>
+<p>Given multiple samples of bulk AIRR-Seq data, <code>NAIR</code> can
+be used to search for TCR/BCR clusters associated with a binary variable
+of interest, such as a disease condition, treatment or clinical outcome.
+See <a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/associated_clusters.html">this
+article</a> for a tutorial.</p>
+</div>
+<div id="searching-for-public-clusters" class="section level3">
+<h3>Searching for Public Clusters</h3>
+<p>The <code>NAIR</code> package includes a set of functions that
+facilitate searching for public TCR/BCR clusters across multiple samples
+of bulk AIRR-seq data. In this context, a public cluster consists of
+similar TCR/BCR clones (e.g., those whose CDR3 amino acid sequences
+differ by at most one amino acid) that are shared across samples (e.g.,
+across individuals or across time points for a single individual). See
+<a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/public_clusters.html">this
+article</a> for a tutorial.</p>
+</div>
+</div>
+<div id="additional-resources" class="section level1">
+<h1>Additional Resources</h1>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p><a href="https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/articles/network_visualization.html">This
+article</a> provides an introduction to the creation and customization
+of network visualizations using <code>NAIR</code>.</p>
+</div>
+<div id="network-properties-and-cluster-analysis" class="section level3">
+<h3>Network Properties and Cluster Analysis</h3>
+<p><a href="node_properties.html">This vignette</a> provides an
+introduction to computing node-level network properties with
+<code>NAIR</code>.</p>
+<p><a href="cluster_analysis.html">This vignette</a> explains how to
+perform cluster analysis with <code>NAIR</code>.</p>
+</div>
+<div id="supplementary-functions" class="section level3">
+<h3>Supplementary Functions</h3>
+<p><a href="supplementary.html">This vignette</a> provides an overview
+of <code>NAIR</code> utility functions that supplement the main function
+<code>buildNet()</code>.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
