@@ -1,7 +1,7 @@
 Package: NAIR
 Type: Package
 Title: Network Analysis of Immune Repertoire
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(
     person("Brian", "Neal", email = "Brian.Neal@ucsf.edu", role = c("aut", "cre")),
     person("Hai", "Yang", email = "Hai.Yang@ucsf.edu", role = "aut"),
@@ -25,11 +25,11 @@ URL:
         https://mlizhangx.github.io/Network-Analysis-for-Repertoire-Sequencing-/,
         https://github.com/mlizhangx/Network-Analysis-for-Repertoire-Sequencing-
 NeedsCompilation: yes
-Packaged: 2023-09-14 08:20:18 UTC; Brian
+Packaged: 2023-09-27 07:47:03 UTC; Brian
 Author: Brian Neal [aut, cre],
   Hai Yang [aut],
   Phi Long Le [aut],
   Li Zhang [cph, aut]
 Maintainer: Brian Neal <Brian.Neal@ucsf.edu>
 Repository: CRAN
-Date/Publication: 2023-09-14 18:50:14 UTC
+Date/Publication: 2023-09-27 10:20:08 UTC

@@ -21,7 +21,7 @@ nrow(toy_data)
 ## -----------------------------------------------------------------------------
 net <- buildRepSeqNetwork(toy_data, "CloneSeq", cluster_stats = TRUE)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildNet(toy_data, "CloneSeq")
 #  
 #  net <- addClusterStats(net)
@@ -47,20 +47,20 @@ net <- buildNet(toy_data, "CloneSeq",
                 count_col = "CloneCount"
 )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildNet(toy_data, "CloneSeq")
 #  net <- addClusterStats(net, count_col = "CloneCount")
 
 ## -----------------------------------------------------------------------------
 net$details$count_col_for_cluster_data
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildRepSeqNetwork(toy_data, "CloneSeq",
 #                            cluster_stats = TRUE,
 #                            cluster_fun = "leiden"
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildRepSeqNetwork(toy_data, "CloneSeq")
 #  net <- addClusterStats(net,
 #                         cluster_fun = "leiden",
@@ -68,7 +68,7 @@ net$details$count_col_for_cluster_data
 #                         n_iterations = 3
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildRepSeqNetwork(toy_data, "CloneSeq")
 #  net <- addClusterMembership(net,
 #                              cluster_fun = "leiden",

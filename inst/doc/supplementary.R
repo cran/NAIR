@@ -18,7 +18,7 @@ head(toy_data)
 ## -----------------------------------------------------------------------------
 nrow(toy_data)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  library(magrittr) # For pipe operator (%>%)
 #  toy_data %>%
 #    filterInputData("CloneSeq", drop_matches = "\\W") %>%
@@ -38,10 +38,10 @@ nrow(toy_data)
 net <- buildRepSeqNetwork(toy_data, "CloneSeq")
 net <- addPlots(net, color_nodes_by = "SampleID")
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- addNodeStats(net, stats_to_include = "all")
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- addClusterStats(net, cluster_fun = "walktrap",
 #                         cluster_id_name = "cluster_walktrap")
 
@@ -74,16 +74,16 @@ net <- buildNet(small_sample, "CloneSeq", plot_title = NULL)
 net <- labelNodes(net, "CloneSeq", size = 4)
 net$plots[[1]]
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  saveNetwork(net, output_dir = dir_out, output_type = "individual")
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  saveNetworkPlots(net$plots, outfile = file.path(dir_out, "plots.pdf"))
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  dat <- loadDataFromFileList(list.files(my_dir), input_type = "rds")
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  loadDataFromFileList(list.files(my_dir),
 #                       input_type = "table",
 #                       read.args = list(
@@ -99,7 +99,7 @@ net$plots[[1]]
 #                       )
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  save(df_sample1, file = file_1)
 #  save(df_sample2, file = file_2)
 #  save(df_sample3, file = file_3)
@@ -111,7 +111,7 @@ net$plots[[1]]
 #                       )
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  dat <- combineSamples(list.files(my_dir),
 #                        input_type = "rds",
 #                        min_seq_length = 7,
@@ -132,7 +132,7 @@ filtered_data <- filterInputData(toy_data,
                                  verbose = TRUE
 )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  my_data <- data.frame(
 #    clone_seq = c("ATCG", rep("ACAC", 2), rep("GGGG", 4)),
 #    clone_count = rep(1, 7),
@@ -150,19 +150,19 @@ filtered_data <- filterInputData(toy_data,
 #                             grouping_cols = c("subject_id", "time_point")
 #    )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  nbd <- getNeighborhood(toy_data,
 #                         seq_col = "CloneSeq",
 #                         target_seq = "GGGGGGGAATTGG"
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- generateNetworkObjects(toy_data, "CloneSeq")
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net$igraph <- generateNetworkGraph(net$adjacency_matrix)
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  output$adjacency_matrix <- generateAdjacencyMatrix(toy_data$CloneSeq)
 #  
 #  # use same settings from original call to buildRepSeqNetwork()

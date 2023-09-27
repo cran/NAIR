@@ -24,7 +24,7 @@ net <- buildNet(toy_data, "CloneSeq",
                 node_stats = TRUE
 )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  net <- buildNet(toy_data, "CloneSeq")
 #  
 #  net <- addNodeStats(net)
@@ -35,7 +35,7 @@ names(net$node_data)
 ## -----------------------------------------------------------------------------
 head(net$node_data[ , c("CloneSeq", "degree", "authority_score")])
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  # Modifying the default set of node-level properties
 #  net <- buildNet(toy_data, "CloneSeq",
 #                  node_stats = TRUE,
@@ -45,7 +45,7 @@ head(net$node_data[ , c("CloneSeq", "degree", "authority_score")])
 #                    )
 #  )
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  # Include only the node-level properties specified below
 #  net <- buildNet(toy_data, "CloneSeq",
 #                  node_stats = TRUE,
