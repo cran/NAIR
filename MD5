@@ -1,6 +1,6 @@
-43d266b7b3431121007eb6ffa81cf996 *DESCRIPTION
+fcd820286b3691e813a0c2de315abc27 *DESCRIPTION
 8c9e359ea75fcae2cc6b6d08b96424e5 *NAMESPACE
-ebdc15b90304c698622948f34f3b821c *NEWS.md
+129efea42e4280ca2a033483f2df9449 *NEWS.md
 e82619ff48bf1e7d80a993d71e308d74 *R/RcppExports.R
 d897e3ee3be430d12fed36c34af11156 *R/aaa.R
 7f99528626957ee313056f6d227a8704 *R/argchecks_lower.R
@@ -15,7 +15,7 @@ d6c5bfac7b8153b4f850e4af3f1daff2 *R/public_clusters.R
 55e6b0c43cfee843c88b72317372e8bf *R/visualization.R
 6cd76bbe073785d3c9187c60f082654d *R/zzz.R
 a6353b4efaf97633901e174b4028abb3 *README.md
-c86e9b9b70ae2bf73c3fdeed84035232 *build/vignette.rds
+b52662669ac78a86aed2638cf265fe96 *build/vignette.rds
 1fdc87033acfdb5a10a0f21db992e1e2 *inst/doc/NAIR.R
 7cebd05336d42e93303b082b0df34656 *inst/doc/NAIR.Rmd
 e1cf8bf6e4774ae3a81ee2577345cef5 *inst/doc/NAIR.html
@@ -24,7 +24,7 @@ c59fecb0a700b008fd4b307ae69e5cf4 *inst/doc/buildRepSeqNetwork.R
 48b461c2f8e88e4b54db94779de40713 *inst/doc/buildRepSeqNetwork.html
 c92db01cf0ee911762be8a51f24d7183 *inst/doc/cluster_analysis.R
 97befd6b8552a30eb3486854ce49543b *inst/doc/cluster_analysis.Rmd
-17831174c67e0724a4f4b2676d8cbf07 *inst/doc/cluster_analysis.html
+a7f461d032a9a079bb254d812fa489ab *inst/doc/cluster_analysis.html
 4e6d8a399d2b93c2f5b9cc9abc4edc16 *inst/doc/dual_chain.R
 4c622d4229c2531a9144c2d198387be9 *inst/doc/dual_chain.Rmd
 5e0a7e31bea961eb35336f8c1754ad9c *inst/doc/dual_chain.html
@@ -33,7 +33,7 @@ c92db01cf0ee911762be8a51f24d7183 *inst/doc/cluster_analysis.R
 797646360d3e2a03e2c6577be209e96c *inst/doc/node_properties.html
 81e082fe10911de5242a867a26663642 *inst/doc/supplementary.R
 52f6a9bbf9bc9cc418270e31c32874c9 *inst/doc/supplementary.Rmd
-6f360be8c7e956f75bfe510c2d088532 *inst/doc/supplementary.html
+bc7e0e462285a2457abb57c2edb48762 *inst/doc/supplementary.html
 a69a5f0d5f6fb1f31d7f40e093256d7e *man/NAIR-package.Rd
 943f56bb927cc29d02c6a92ea7db9d94 *man/addClusterLabels.Rd
 d2c9dc674b70cc5fe078d09d0e310d9a *man/addClusterMembership.Rd
@@ -84,7 +84,7 @@ b2e903f1b596fb5e286ef97993231d19 *src/levDistBounded.cpp
 77bf3926dcd196c580b4e1181bcbb85c *src/levDistBounded.h
 3dafdd517505a570670cb3e891641e26 *tests/testthat.R
 cab264579a0792f3d48c20803067e174 *tests/testthat/test_argchecks.R
-bc39a12bd26e7bc43dae8e75c790ed60 *tests/testthat/test_functions.R
+ac3987fd5adf034aa340b8cfd9292e3f *tests/testthat/test_functions.R
 7cebd05336d42e93303b082b0df34656 *vignettes/NAIR.Rmd
 356da743cda95a44e461b639fe59e2c0 *vignettes/buildRepSeqNetwork.Rmd
 97befd6b8552a30eb3486854ce49543b *vignettes/cluster_analysis.Rmd
