@@ -411,274 +411,305 @@ test_that("levDistBounded works as expected", {
 
 
 test_that("generateAdjacencyMatrix behaves as expected", {
-
-  cloneSeq <- c("A", "AA", "AB", "BB")
-  cloneSeqB <- c("A", "AA", "ACCC", "AB", "BB")
-  expect_warning(
-    adjMat_k0 <- generateAdjacencyMatrix(
-      cloneSeq, dist_cutoff = 0, dist_type = "levenshtein"
+  methodCutoffLim <- function(method, cutoff) {
+    if ((method == "sort" & cutoff != 1) ||
+        (method == "pattern" & cutoff > 2)) {
+      return("default")
+    } else {
+      return(method)
+    }
+  }
+  for (method in c("default", "pattern", "sort")) {
+    cloneSeq <- c("A", "AA", "AB", "BB")
+    cloneSeqB <- c("A", "AA", "ACCC", "AB", "BB")
+    expect_warning(
+      adjMat_k0 <- generateAdjacencyMatrix(
+        cloneSeq, dist_cutoff = 0, dist_type = "levenshtein",
+        method = methodCutoffLim(method, 0)
+      )
     )
-  )
-  adjMat_k1 <- generateAdjacencyMatrix(
-    cloneSeq, dist_cutoff = 1, dist_type = "levenshtein"
-  )
-  adjMat_k2 <- generateAdjacencyMatrix(
-    cloneSeq, dist_cutoff = 2, dist_type = "levenshtein"
-  )
-
-  expect_warning(
-    adjMatB_k0 <- generateAdjacencyMatrix(
-      cloneSeqB, dist_cutoff = 0, dist_type = "levenshtein"
+    adjMat_k1 <- generateAdjacencyMatrix(
+      cloneSeq, dist_cutoff = 1, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 1)
     )
-  )
-  adjMatB_k1 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 1, dist_type = "levenshtein"
-  )
-  adjMatB_k2 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 2, dist_type = "levenshtein"
-  )
-  adjMatB_k3 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 3, dist_type = "levenshtein"
-  )
-  adjMatB_k4 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 4, dist_type = "levenshtein"
-  )
-  adjMat_k1_truth <- adjMat_k2_truth <- adjMatB_k2_truth <-
-    matrix(1, nrow = 4, ncol = 4)
-  adjMat_k1_truth[c(1, 2), 4] <- 0
-  adjMat_k1_truth[4, c(1, 2)] <- 0
-  adjMatB_k2_truth <- adjMat_k2_truth
-  adjMatB_k1_truth <- adjMat_k1_truth
-  adjMatB_k3_truth <- adjMatB_k4_truth <- matrix(1, nrow = 5, ncol = 5)
-  adjMatB_k3_truth[3, 5] <- 0
-  adjMatB_k3_truth[5, 3] <- 0
-
-  expect_equal(0, length(adjMat_k0))
-  expect_equal(
-    as.matrix(adjMat_k1), adjMat_k1_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:4, as.numeric(dimnames(adjMat_k1)[[1]])
-  )
-  expect_equal(
-    cloneSeq[1:4], dimnames(adjMat_k1)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMat_k2), adjMat_k2_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:4, as.numeric(dimnames(adjMat_k2)[[1]])
-  )
-  expect_equal(
-    cloneSeq[1:4], dimnames(adjMat_k2)[[2]]
-  )
-
-  expect_equal(0, length(adjMatB_k0))
-  expect_equal(
-    as.matrix(adjMatB_k1), adjMatB_k1_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k1)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k1)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k2), adjMatB_k2_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k2)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k2)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k3), adjMatB_k3_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:5, as.numeric(dimnames(adjMatB_k3)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[1:5], dimnames(adjMatB_k3)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k4), adjMatB_k4_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:5, as.numeric(dimnames(adjMatB_k4)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[1:5], dimnames(adjMatB_k4)[[2]]
-  )
-
-  expect_warning(
-    adjMat_k0 <- generateAdjacencyMatrix(
-      cloneSeq, dist_cutoff = 0, dist_type = "hamming"
+    adjMat_k2 <- generateAdjacencyMatrix(
+      cloneSeq, dist_cutoff = 2, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 2)
     )
-  )
-  adjMat_k1 <- generateAdjacencyMatrix(
-    cloneSeq, dist_cutoff = 1, dist_type = "hamming"
-  )
-  adjMat_k2 <- generateAdjacencyMatrix(
-    cloneSeq, dist_cutoff = 2, dist_type = "hamming"
-  )
-
-  expect_warning(
-    adjMatB_k0 <- generateAdjacencyMatrix(
-      cloneSeqB, dist_cutoff = 0, dist_type = "hamming"
+    
+    expect_warning(
+      adjMatB_k0 <- generateAdjacencyMatrix(
+        cloneSeqB, dist_cutoff = 0, dist_type = "levenshtein",
+        method = methodCutoffLim(method, 0)
+      )
     )
-  )
-  adjMatB_k1 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 1, dist_type = "hamming"
-  )
-  adjMatB_k2 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 2, dist_type = "hamming"
-  )
-  adjMatB_k3 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 3, dist_type = "hamming"
-  )
-  adjMatB_k4 <- generateAdjacencyMatrix(
-    cloneSeqB, dist_cutoff = 4, dist_type = "hamming"
-  )
-
-
-  expect_equal(0, length(adjMat_k0))
-  expect_equal(
-    as.matrix(adjMat_k1), adjMat_k1_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:4, as.numeric(dimnames(adjMat_k1)[[1]])
-  )
-  expect_equal(
-    cloneSeq[1:4], dimnames(adjMat_k1)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMat_k2), adjMat_k2_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:4, as.numeric(dimnames(adjMat_k2)[[1]])
-  )
-  expect_equal(
-    cloneSeq[1:4], dimnames(adjMat_k2)[[2]]
-  )
-
-  expect_equal(0, length(adjMatB_k0))
-  expect_equal(
-    as.matrix(adjMatB_k1), adjMatB_k1_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k1)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k1)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k2), adjMatB_k2_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k2)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k2)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k3), adjMatB_k3_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:5, as.numeric(dimnames(adjMatB_k3)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[1:5], dimnames(adjMatB_k3)[[2]]
-  )
-  expect_equal(
-    as.matrix(adjMatB_k4), adjMatB_k4_truth,
-    ignore_attr = TRUE
-  )
-  expect_equal(
-    1:5, as.numeric(dimnames(adjMatB_k4)[[1]])
-  )
-  expect_equal(
-    cloneSeqB[1:5], dimnames(adjMatB_k4)[[2]]
-  )
-
-  mat <- matrix(1, nrow = 4, ncol = 4)
-  mat[c(1, 2), 4] <- 0
-  mat[4, c(1, 2)] <- 0
-  rownames(mat) <- c(1, 2, 3, 5)
-  colnames(mat) <- c("fee", "fie", "foe", "foo")
-  mat <- Matrix::Matrix(mat, sparse = TRUE)
-  mat2 <- generateAdjacencyMatrix(
-    c("fee", "fie", "foe", "fum", "foo")
-  )
-  expect_s4_class(mat2, "sparseMatrix")
-  expect_equal(mat, mat2)
-  expect_equal(colnames(mat), colnames(mat2))
-  expect_equal(rownames(mat), rownames(mat2))
-
-  expect_warning(
-    mat <- generateAdjacencyMatrix(
-      c("foo", "foobar", "fubar", "bar")
+    adjMatB_k1 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 1, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 1)
     )
-  )
-  expect_s4_class(mat, "sparseMatrix")
-  expect_equal(dim(mat), c(0, 0))
-  expect_warning(
-    mat <- generateAdjacencyMatrix(
-      c("foo", "foobar", "fubar", "bar"), dist_cutoff = 2
+    adjMatB_k2 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 2, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 2)
     )
-  )
-  expect_s4_class(mat, "sparseMatrix")
-  expect_equal(dim(mat), c(0, 0))
+    adjMatB_k3 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 3, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 3)
+    )
+    adjMatB_k4 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 4, dist_type = "levenshtein",
+      method = methodCutoffLim(method, 4)
+    )
+    adjMat_k1_truth <- adjMat_k2_truth <- adjMatB_k2_truth <-
+      matrix(1, nrow = 4, ncol = 4)
+    adjMat_k1_truth[c(1, 2), 4] <- 0
+    adjMat_k1_truth[4, c(1, 2)] <- 0
+    adjMatB_k2_truth <- adjMat_k2_truth
+    adjMatB_k1_truth <- adjMat_k1_truth
+    adjMatB_k3_truth <- adjMatB_k4_truth <- matrix(1, nrow = 5, ncol = 5)
+    adjMatB_k3_truth[3, 5] <- 0
+    adjMatB_k3_truth[5, 3] <- 0
 
-  mat <- as(diag(4), "dgCMatrix")
-  mat2 <- generateAdjacencyMatrix(
-    c("foo", "foobar", "fubar", "bar"),
-    drop_isolated_nodes = FALSE
-  )
-  expect_s4_class(mat2, "sparseMatrix")
-  expect_equal(mat, mat2)
+    expect_equal(0, length(adjMat_k0))
+    expect_equal(
+      as.matrix(adjMat_k1), adjMat_k1_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:4, as.numeric(dimnames(adjMat_k1)[[1]])
+    )
+    expect_equal(
+      cloneSeq[1:4], dimnames(adjMat_k1)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMat_k2), adjMat_k2_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:4, as.numeric(dimnames(adjMat_k2)[[1]])
+    )
+    expect_equal(
+      cloneSeq[1:4], dimnames(adjMat_k2)[[2]]
+    )
 
-  mat <- matrix(1, nrow = 3, ncol = 3)
-  mat[1, 3] <- mat[3, 1] <- 0
-  rownames(mat) <- c(2, 3, 4)
-  colnames(mat) <- c("foobar", "fubar", "bar")
-  mat <- Matrix::Matrix(mat, sparse = TRUE)
-  mat2 <- generateAdjacencyMatrix(
-    c("foo", "foobar", "fubar", "bar"),
-    dist_type = "levenshtein",
-    dist_cutoff = 2
-  )
-  expect_s4_class(mat2, "sparseMatrix")
-  expect_equal(mat, mat2)
-  expect_equal(colnames(mat), colnames(mat2))
-  expect_equal(rownames(mat), rownames(mat2))
+    expect_equal(0, length(adjMatB_k0))
+    expect_equal(
+      as.matrix(adjMatB_k1), adjMatB_k1_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k1)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k1)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k2), adjMatB_k2_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k2)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k2)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k3), adjMatB_k3_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:5, as.numeric(dimnames(adjMatB_k3)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[1:5], dimnames(adjMatB_k3)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k4), adjMatB_k4_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:5, as.numeric(dimnames(adjMatB_k4)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[1:5], dimnames(adjMatB_k4)[[2]]
+    )
 
-  mat <- matrix(1, nrow = 3, ncol = 3)
-  mat[2, 3] <- mat[3, 2] <- 0
-  rownames(mat) <- c(1, 2, 4)
-  colnames(mat) <- c("foo", "foobar", "bar")
-  mat <- Matrix::Matrix(mat, sparse = TRUE)
-  mat2 <- generateAdjacencyMatrix(
-    c("foo", "foobar", "fubar", "bar"),
-    dist_cutoff = 3
-  )
-  expect_s4_class(mat2, "sparseMatrix")
-  expect_equal(mat, mat2)
-  expect_equal(colnames(mat), colnames(mat2))
-  expect_equal(rownames(mat), rownames(mat2))
+    expect_warning(
+      adjMat_k0 <- generateAdjacencyMatrix(
+        cloneSeq, dist_cutoff = 0, dist_type = "hamming",
+        method = methodCutoffLim(method, 0)
+      )
+    )
+    adjMat_k1 <- generateAdjacencyMatrix(
+      cloneSeq, dist_cutoff = 1, dist_type = "hamming",
+      method = methodCutoffLim(method, 1)
+    )
+    adjMat_k2 <- generateAdjacencyMatrix(
+      cloneSeq, dist_cutoff = 2, dist_type = "hamming",
+      method = methodCutoffLim(method, 2)
+    )
 
-  expect_false(file.exists(file.path(tempdir(), "col_ids.txt")))
+    expect_warning(
+      adjMatB_k0 <- generateAdjacencyMatrix(
+        cloneSeqB, dist_cutoff = 0, dist_type = "hamming",
+        method = methodCutoffLim(method, 0)
+      )
+    )
+    adjMatB_k1 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 1, dist_type = "hamming",
+      method = methodCutoffLim(method, 1)
+    )
+    adjMatB_k2 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 2, dist_type = "hamming",
+      method = methodCutoffLim(method, 2)
+    )
+    adjMatB_k3 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 3, dist_type = "hamming",
+      method = methodCutoffLim(method, 3)
+    )
+    adjMatB_k4 <- generateAdjacencyMatrix(
+      cloneSeqB, dist_cutoff = 4, dist_type = "hamming",
+      method = methodCutoffLim(method, 4)
+    )
+
+
+    expect_equal(0, length(adjMat_k0))
+    expect_equal(
+      as.matrix(adjMat_k1), adjMat_k1_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:4, as.numeric(dimnames(adjMat_k1)[[1]])
+    )
+    expect_equal(
+      cloneSeq[1:4], dimnames(adjMat_k1)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMat_k2), adjMat_k2_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:4, as.numeric(dimnames(adjMat_k2)[[1]])
+    )
+    expect_equal(
+      cloneSeq[1:4], dimnames(adjMat_k2)[[2]]
+    )
+
+    expect_equal(0, length(adjMatB_k0))
+    expect_equal(
+      as.matrix(adjMatB_k1), adjMatB_k1_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k1)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k1)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k2), adjMatB_k2_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      c(1, 2, 4, 5), as.numeric(dimnames(adjMatB_k2)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[c(1, 2, 4, 5)], dimnames(adjMatB_k2)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k3), adjMatB_k3_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:5, as.numeric(dimnames(adjMatB_k3)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[1:5], dimnames(adjMatB_k3)[[2]]
+    )
+    expect_equal(
+      as.matrix(adjMatB_k4), adjMatB_k4_truth,
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      1:5, as.numeric(dimnames(adjMatB_k4)[[1]])
+    )
+    expect_equal(
+      cloneSeqB[1:5], dimnames(adjMatB_k4)[[2]]
+    )
+
+    mat <- matrix(1, nrow = 4, ncol = 4)
+    mat[c(1, 2), 4] <- 0
+    mat[4, c(1, 2)] <- 0
+    rownames(mat) <- c(1, 2, 3, 5)
+    colnames(mat) <- c("fee", "fie", "foe", "foo")
+    mat <- Matrix::Matrix(mat, sparse = TRUE)
+    mat2 <- generateAdjacencyMatrix(
+      c("fee", "fie", "foe", "fum", "foo"),
+      method = methodCutoffLim(method, 1)
+    )
+    expect_s4_class(mat2, "sparseMatrix")
+    expect_equal(mat, mat2)
+    expect_equal(colnames(mat), colnames(mat2))
+    expect_equal(rownames(mat), rownames(mat2))
+
+    expect_warning(
+      mat <- generateAdjacencyMatrix(
+        c("foo", "foobar", "fubar", "bar"),
+        method = methodCutoffLim(method, 1)
+      )
+    )
+    expect_s4_class(mat, "sparseMatrix")
+    expect_equal(dim(mat), c(0, 0))
+    expect_warning(
+      mat <- generateAdjacencyMatrix(
+        c("foo", "foobar", "fubar", "bar"), dist_cutoff = 2,
+        method = methodCutoffLim(method, 2)
+      )
+    )
+    expect_s4_class(mat, "sparseMatrix")
+    expect_equal(dim(mat), c(0, 0))
+
+    mat <- as(diag(4), "dgCMatrix")
+    mat2 <- generateAdjacencyMatrix(
+      c("foo", "foobar", "fubar", "bar"),
+      drop_isolated_nodes = FALSE,
+      method = methodCutoffLim(method, 1)
+    )
+    expect_s4_class(mat2, "sparseMatrix")
+    expect_equal(mat, mat2)
+
+    mat <- matrix(1, nrow = 3, ncol = 3)
+    mat[1, 3] <- mat[3, 1] <- 0
+    rownames(mat) <- c(2, 3, 4)
+    colnames(mat) <- c("foobar", "fubar", "bar")
+    mat <- Matrix::Matrix(mat, sparse = TRUE)
+    mat2 <- generateAdjacencyMatrix(
+      c("foo", "foobar", "fubar", "bar"),
+      dist_type = "levenshtein",
+      dist_cutoff = 2,
+      method = methodCutoffLim(method, 2)
+    )
+    expect_s4_class(mat2, "sparseMatrix")
+    expect_equal(mat, mat2)
+    expect_equal(colnames(mat), colnames(mat2))
+    expect_equal(rownames(mat), rownames(mat2))
+
+    mat <- matrix(1, nrow = 3, ncol = 3)
+    mat[2, 3] <- mat[3, 2] <- 0
+    rownames(mat) <- c(1, 2, 4)
+    colnames(mat) <- c("foo", "foobar", "bar")
+    mat <- Matrix::Matrix(mat, sparse = TRUE)
+    mat2 <- generateAdjacencyMatrix(
+      c("foo", "foobar", "fubar", "bar"),
+      dist_cutoff = 3,
+      method = methodCutoffLim(method, 3)
+    )
+    expect_s4_class(mat2, "sparseMatrix")
+    expect_equal(mat, mat2)
+    expect_equal(colnames(mat), colnames(mat2))
+    expect_equal(rownames(mat), rownames(mat2))
+
+    expect_false(file.exists(file.path(tempdir(), "col_ids.txt")))
+  }
 })
 
 
@@ -1256,167 +1287,191 @@ test_that("extractLayout works", {
 
 test_that("plots legends behave correctly", {
 
+  get_guide <- function(plot, aes) {
+    if (inherits(plot$guides, "Guides")) {
+      plot$guides$guides[[aes]]
+    } else {
+      plot$guides[[aes]]
+    }
+  }
 
-  expect_equal(names(net$plots$cluster_greedy$guides),
+  get_guide_params <- function(plot, aes) {
+    if (inherits(plot$guides, "Guides")) {
+      plot$guides$guides[[aes]]$params
+    } else {
+      plot$guides[[aes]]
+    }
+  }
+
+  get_guide_names <- function(plot) {
+    if (inherits(plot$guides, "Guides")) {
+      names(plot$guides$guides)
+    } else {
+      names(plot$guides)
+    }
+  }
+
+
+  expect_equal(get_guide_names(net$plots$cluster_greedy),
                "colour"
   )
-  expect_equal(net$plots$cluster_greedy$guides$colour$title,
+  expect_equal(get_guide_params(net$plots$cluster_greedy, "colour")$title,
                "cluster_greedy"
   )
-  expect_equal(net$plots$cluster_greedy$guides$colour$name,
+  expect_equal(get_guide_params(net$plots$cluster_greedy, "colour")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$cluster_leiden$guides),
+  expect_equal(get_guide_names(net$plots$cluster_leiden),
                "colour"
   )
-  expect_equal(net$plots$cluster_leiden$guides$colour,
+  expect_equal(get_guide(net$plots$cluster_leiden, "colour"),
                "none"
   )
   expect_match(net$plots$cluster_leiden$labels$subtitle,
                "Nodes colored by cluster_leiden"
   )
 
-  expect_equal(names(net$plots$transitivity$guides),
+  expect_equal(get_guide_names(net$plots$transitivity),
                c("colour", "size")
   )
-  expect_equal(net$plots$transitivity$guides$colour$title,
+  expect_equal(get_guide_params(net$plots$transitivity, "colour")$title,
                "Transitivity"
   )
-  expect_equal(net$plots$transitivity$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net$plots$transitivity, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
-  expect_equal(net$plots$transitivity$guides$size$title,
+  expect_equal(get_guide_params(net$plots$transitivity, "size")$title,
                "Clone Count"
   )
-  expect_equal(net$plots$transitivity$guides$size$name,
+  expect_equal(get_guide_params(net$plots$transitivity, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$CloneCount$guides),
+  expect_equal(get_guide_names(net$plots$CloneCount),
                c("colour", "size")
   )
-  expect_equal(net$plots$CloneCount$guides$colour$title,
+  expect_equal(get_guide_params(net$plots$CloneCount, "colour")$title,
                "Clone Count"
   )
-  expect_equal(net$plots$CloneCount$guides$colour$name,
+  expect_equal(get_guide_params(net$plots$CloneCount, "colour")$name,
                "legend"
   )
-  expect_equal(net$plots$CloneCount$guides$size$title,
+  expect_equal(get_guide_params(net$plots$CloneCount, "size")$title,
                "Clone Count"
   )
-  expect_equal(net$plots$CloneCount$guides$size$name,
+  expect_equal(get_guide_params(net$plots$CloneCount, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$eigen_centrality$guides),
+  expect_equal(get_guide_names(net$plots$eigen_centrality),
                c("colour", "size")
   )
-  expect_equal(net$plots$eigen_centrality$guides$colour$title,
+  expect_equal(get_guide_params(net$plots$eigen_centrality, "colour")$title,
                "Eigen Centrality"
   )
-  expect_equal(net$plots$eigen_centrality$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net$plots$eigen_centrality, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
-  expect_equal(net$plots$eigen_centrality$guides$size$title,
+  expect_equal(get_guide_params(net$plots$eigen_centrality, "size")$title,
                "eigen_centrality"
   )
-  expect_equal(net$plots$eigen_centrality$guides$size$name,
+  expect_equal(get_guide_params(net$plots$eigen_centrality, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$authority_score$guides),
+  expect_equal(get_guide_names(net$plots$authority_score),
                c("colour", "size")
   )
-  expect_equal(net$plots$authority_score$guides$colour$title,
+  expect_equal(get_guide_params(net$plots$authority_score, "colour")$title,
                "authority_score"
   )
-  expect_equal(net$plots$authority_score$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net$plots$authority_score, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
-  expect_equal(net$plots$authority_score$guides$size$title,
+  expect_equal(get_guide_params(net$plots$authority_score, "size")$title,
                "eigen_centrality"
   )
-  expect_equal(net$plots$authority_score$guides$size$name,
+  expect_equal(get_guide_params(net$plots$authority_score, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$coreness$guides),
+  expect_equal(get_guide_names(net$plots$coreness),
                c("colour", "size")
   )
-  expect_equal(net$plots$coreness$guides$colour,
+  expect_equal(get_guide(net$plots$coreness, "colour"),
                "none"
   )
-  expect_equal(net$plots$coreness$guides$size$title,
+  expect_equal(get_guide_params(net$plots$coreness, "size")$title,
                "coreness"
   )
-  expect_equal(net$plots$coreness$guides$size$name,
+  expect_equal(get_guide_params(net$plots$coreness, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net$plots$page_rank$guides),
+  expect_equal(get_guide_names(net$plots$page_rank),
                c("colour", "size")
   )
-  expect_null(net$plots$page_rank$guides$colour$title
+  expect_null(get_guide_params(net$plots$page_rank, "colour")$title
   )
-  expect_equal(net$plots$page_rank$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net$plots$page_rank, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
-  expect_equal(net$plots$page_rank$guides$size$title,
+  expect_equal(get_guide_params(net$plots$page_rank, "size")$title,
                "page_rank"
   )
-  expect_equal(net$plots$page_rank$guides$size$name,
+  expect_equal(get_guide_params(net$plots$page_rank, "size")$name,
                "legend"
   )
 
-  expect_equal(names(net2$plots$CloneCount$guides),
+  expect_equal(get_guide_names(net2$plots$CloneCount),
                "colour"
   )
-  expect_equal(net2$plots$CloneCount$guides$colour$title,
+  expect_equal(get_guide_params(net2$plots$CloneCount, "colour")$title,
                "CloneCount"
   )
-  expect_equal(net2$plots$CloneCount$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net2$plots$CloneCount, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
 
   expect_equal(names(net3$plots), c("cluster_id", "graph_layout"))
-  expect_equal(names(net3$plots$cluster_id$guides),
+  expect_equal(get_guide_names(net3$plots$cluster_id),
                "colour"
   )
-  expect_equal(net3$plots$cluster_id$guides$colour$title,
+  expect_equal(get_guide_params(net3$plots$cluster_id, "colour")$title,
                "cluster_id"
   )
-  expect_equal(net3$plots$cluster_id$guides$colour$name,
+  expect_equal(get_guide_params(net3$plots$cluster_id, "colour")$name,
                "legend"
   )
 
   expect_equal(names(net4$plots), c("degree", "graph_layout"))
-  expect_equal(names(net4$plots$degree$guides),
+  expect_equal(get_guide_names(net4$plots$degree),
                "colour"
   )
-  expect_equal(net4$plots$degree$guides$colour$title,
+  expect_equal(get_guide_params(net4$plots$degree, "colour")$title,
                "degree"
   )
-  expect_equal(net4$plots$degree$guides$colour$name,
-               "colorbar"
+  expect_true(get_guide_params(net4$plots$degree, "colour")$name %in%
+              c("colorbar", "colourbar")
   )
 
   expect_equal(names(net5$plots), c("uniform_color", "graph_layout"))
-  expect_null(names(net5$plots$uniform_color$guides))
+  expect_null(get_guide_names(net5$plots$uniform_color))
 
-  expect_equal(names(sc_net$plots$SampleID$guides),
+  expect_equal(get_guide_names(sc_net$plots$SampleID),
                c("colour", "size")
   )
-  expect_equal(sc_net$plots$SampleID$guides$colour$title,
+  expect_equal(get_guide_params(sc_net$plots$SampleID, "colour")$title,
                "SampleID"
   )
-  expect_equal(sc_net$plots$SampleID$guides$colour$name,
+  expect_equal(get_guide_params(sc_net$plots$SampleID, "colour")$name,
                "legend"
   )
-  expect_equal(sc_net$plots$SampleID$guides$size$title,
+  expect_equal(get_guide_params(sc_net$plots$SampleID, "size")$title,
                "UMIs"
   )
-  expect_equal(sc_net$plots$SampleID$guides$size$name,
+  expect_equal(get_guide_params(sc_net$plots$SampleID, "size")$name,
                "legend"
   )
 

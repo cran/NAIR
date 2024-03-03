@@ -228,6 +228,29 @@
   "hamming"
 }
 
+.matchMethod <- function(x, cutoff) {
+  if (pmatch(x, "pattern", 0)) {
+    if (!any(cutoff == c(0, 1, 2))) {
+      warning(
+        "pattern algorithm only supports 'dist_cutoff' values of 0, 1 and 2.",
+        "Defaulting to ", dQuote("default")
+      )
+      return("default")
+    }
+    return("pattern")
+  } else if (pmatch(x, "sort", 0)) {
+    if (!any(cutoff == c(1))) {
+      warning(
+        "sort algorithm only supports 'dist_cutoff' value 1.",
+        "Defaulting to ", dQuote("default")
+      )
+      return("default")
+    }
+    return("sort")
+  }
+  "default"
+}
+
 .checkDistType <- function(x, default = "hamming") {
   if (!.isDistType(x)) {
     warning(
@@ -237,6 +260,17 @@
     return(default)
   }
   .matchDistType(x)
+}
+
+.checkMethod <- function(x, cutoff, default = "default") {
+  if (!.isString(x) || !pmatch(x, c("default", "pattern", "sort"), nomatch = 0)) {
+    warning(
+      "value for ", sQuote(deparse(substitute(x))), " is invalid. ",
+      "Defaulting to ", deparse(substitute(default))
+    )
+    return(default)
+  }
+  .matchMethod(x, cutoff)
 }
 
 .isStatsToInclude <- function(x) {

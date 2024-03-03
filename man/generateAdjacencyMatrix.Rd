@@ -17,6 +17,7 @@ generateAdjacencyMatrix(
   dist_type = "hamming",
   dist_cutoff = 1,
   drop_isolated_nodes = TRUE,
+  method = "default",
   verbose = FALSE
 )
 
@@ -26,6 +27,7 @@ sparseAdjacencyMatFromSeqs(
   dist_type = "hamming",
   dist_cutoff = 1,
   drop_isolated_nodes = TRUE,
+  method = "default",
   verbose = FALSE,
   max_dist = deprecated()
 )
@@ -55,6 +57,9 @@ two sequences to be identical in order for their nodes to be joined by an edge.
   \item{drop_isolated_nodes}{
 Logical. When \code{TRUE}, removes each node that is not joined by an
 edge connection to any other node in the network graph.
+}
+  \item{method}{
+A character string specifying the algorithm to use. Choices are \code{"default"} and  \code{"pattern"}. \code{"pattern"} is only valid when \code{dist_cutoff < 3}, but tends to be faster than \code{"default"} for sparsely connected networks, at the cost of greater memory usage (can cause crashes for large or densely-connected networks, particularly for \code{dist_cutoff = 2}). The default algorithm tends to be faster for densely-connected networks or long sequences.
 }
   \item{verbose}{
       Logical. If \code{TRUE}, generates messages about the tasks
